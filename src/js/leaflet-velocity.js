@@ -29,30 +29,25 @@
 		_mouseControl: null,
 		
 		init: function (options) {
-			
-			// don't bother setting up if the service is unavailable
-			LeafletVelocity._checkWind(options).then(function() {
 
-				// set properties
-				LeafletVelocity._map = options.map;
-				LeafletVelocity._options = options;
+			// set properties
+			LeafletVelocity._map = options.map;
+			LeafletVelocity._data = options.data;
+			LeafletVelocity._options = options;
 
-				// create canvas, add overlay control
-				LeafletVelocity._canvasLayer = L.canvasLayer().delegate(LeafletVelocity);
-				LeafletVelocity._options.layerControl.addOverlay(LeafletVelocity._canvasLayer, 'velocity');
+			// create canvas, add overlay control
+			LeafletVelocity._canvasLayer = L.canvasLayer().delegate(LeafletVelocity);
+			LeafletVelocity._options.layerControl.addOverlay(
+				LeafletVelocity._canvasLayer,
+				options.overlayName || 'velocity'
+			);
 
-				// ensure clean up on deselect overlay
-				LeafletVelocity._map.on('overlayremove', function (e) {
-					if (e.layer == LeafletVelocity._canvasLayer) {
-						LeafletVelocity._destroyWind();
-					}
-				});
-
-			}).catch(function(err) {
-				console.log('err');
-				LeafletVelocity._options.errorCallback(err);
+			// ensure clean up on deselect overlay
+			LeafletVelocity._map.on('overlayremove', function (e) {
+				if (e.layer == LeafletVelocity._canvasLayer) {
+					LeafletVelocity._destroyWind();
+				}
 			});
-
 		},
 
 		setTime: function (timeIso) {
@@ -61,84 +56,10 @@
 
 		/*------------------------------------ PRIVATE ------------------------------------------*/
 
-		/**
-		 * Ping the test endpoint to check if wind server is available
-		 *
-		 * @param options
-		 * @returns {Promise}
-		 */
-		_checkWind: function (options) {
-
-			return new Promise(function (resolve, reject) {
-
-				if (options.localMode) resolve(true);
-
-				$.ajax({
-					type: 'GET',
-					url: options.pingUrl,
-					error: function error(err) {
-						reject(err);
-					},
-					success: function success(data) {
-						resolve(data);
-					}
-				});
-			});
-		},
-
-		_getRequestUrl: function() {
-
-			if(!this._options.useNearest) {
-				return this._options.latestUrl;
-			}
-
-			var params = {
-				"timeIso": this._options.timeISO || new Date().toISOString(),
-				"searchLimit": this._options.nearestDaysLimit || 7 // don't show data out by more than limit
-			};
-
-			return this._options.nearestUrl + '?' + $.param(params);
-		},
-
-		_loadLocalData: function() {
-
-			console.log('using local data..');
-
-			$.getJSON('velocity.json', function (data) {
-				LeafletVelocity._data = data;
-				LeafletVelocity._initWindy(data);
-			});
-		},
-
-		_loadWindData: function() {
-
-			if(this._options.localMode) {
-				this._loadLocalData();
-				return;
-			}
-
-			var request = this._getRequestUrl();
-			console.log(request);
-
-			$.ajax({
-				type: 'GET',
-				url: request,
-				error: function error(err) {
-					console.log('error loading data');
-					LeafletVelocity._options.errorCallback(err) || console.log(err);
-					LeafletVelocity._loadLocalData();
-				},
-				success: function success(data) {
-					LeafletVelocity._data = data;
-					LeafletVelocity._initWindy(data);
-				}
-			});
-		},
-
 		onDrawLayer: function(overlay, params) {
 
 			if (!LeafletVelocity._windy) {
-				LeafletVelocity._loadWindData();
+				LeafletVelocity._initWindy(LeafletVelocity._data);
 				return;
 			}
 
@@ -166,6 +87,11 @@
 
 
 		_initWindy: function(data) {
+
+			console.log('init windy');
+			console.log(data);
+			console.log(LeafletVelocity);
+
 
 			// windy object
 			this._windy = new Windy({ canvas: LeafletVelocity._canvasLayer._canvas, data: data });

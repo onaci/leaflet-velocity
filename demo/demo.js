@@ -39,29 +39,21 @@ function initDemoMap(){
 var mapStuff = initDemoMap();
 var map = mapStuff.map;
 var layerControl = mapStuff.layerControl;
-var handleError = function(err){
-    console.log('handleError...');
-    console.log(err);
-};
 
-// TODO init with data, rm remote data accessing
-LeafletVelocity.init({
-	localMode: true,
-	map: map,
-	layerControl: layerControl,
-	useNearest: false,
-	timeISO: null,
-	nearestDaysLimit: 7,
-	displayValues: true,
-	displayOptions: {
-		displayPosition: 'bottomleft',
-		displayEmptyString: 'No velocity data'
-	},
-	overlayName: 'velocity',
+// load data (u, v grids) from somewhere
+$.getJSON('velocity.json', function (data) {
 
-	// https://github.com/danwild/wind-js-server
-	pingUrl: 'http://localhost:7000/alive',
-	latestUrl: 'http://localhost:7000/latest',
-	nearestUrl: 'http://localhost:7000/nearest',
-	errorCallback: handleError
+	LeafletVelocity.init({
+		map: map,
+		layerControl: layerControl,
+		displayValues: true,
+		displayOptions: {
+			displayPosition: 'bottomleft',
+			displayEmptyString: 'No velocity data'
+		},
+		overlayName: 'velocity',
+		data: data // see demo/velocity.json
+	});
 });
+
+

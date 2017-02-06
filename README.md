@@ -7,6 +7,21 @@ A plugin for Leaflet (v1.0.3, and v0.7.7) to add visualisation overlay for direc
 
 ![Screenshot](/screenshots/velocity.gif?raw=true)
 
+## Example use:
+```javascript
+LeafletVelocity.init({
+		map: map, // ref to your leaflet map
+		layerControl: layerControl, // ref to your leaflet layer control
+		displayValues: true, // show values on hover
+		displayOptions: {
+			displayPosition: 'bottomleft',
+			displayEmptyString: 'No velocity data'
+		},
+		overlayName: 'velocity', // label for overlay control
+		data: data // see demo/velocity.json
+	});
+```
+
 ## Reference
 `leaflet-velocity` is possible because of things like:
 - [L.CanvasOverlay.js](https://gist.github.com/Sumbera/11114288)
