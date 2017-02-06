@@ -27,7 +27,7 @@ function initDemoMap(){
 
     var layerControl = L.control.layers(baseLayers);
     layerControl.addTo(map);
-    map.setView([50.00, 14.44], 3);
+    map.setView([-22, 150], 5);
 
     return {
         map: map,
@@ -44,6 +44,7 @@ var handleError = function(err){
     console.log(err);
 };
 
+// TODO init with data, rm remote data accessing
 LeafletVelocity.init({
 	localMode: true,
 	map: map,
@@ -54,9 +55,9 @@ LeafletVelocity.init({
 	displayValues: true,
 	displayOptions: {
 		displayPosition: 'bottomleft',
-		displayEmptyString: 'No wind data'
+		displayEmptyString: 'No velocity data'
 	},
-	overlayName: 'wind',
+	overlayName: 'velocity',
 
 	// https://github.com/danwild/wind-js-server
 	pingUrl: 'http://localhost:7000/alive',

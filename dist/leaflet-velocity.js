@@ -753,7 +753,7 @@ L.control.velocityPosition = function (options) {
 
 				// create canvas, add overlay control
 				LeafletVelocity._canvasLayer = L.canvasLayer().delegate(LeafletVelocity);
-				LeafletVelocity._options.layerControl.addOverlay(LeafletVelocity._canvasLayer, 'wind');
+				LeafletVelocity._options.layerControl.addOverlay(LeafletVelocity._canvasLayer, 'velocity');
 
 				// ensure clean up on deselect overlay
 				LeafletVelocity._map.on('overlayremove', function (e) {
@@ -877,7 +877,9 @@ L.control.velocityPosition = function (options) {
 			this.onDrawLayer();
 
 			this._map.on('dragstart', LeafletVelocity._windy.stop);
-			this._map.on('zoomstart', LeafletVelocity._clearWind);
+			this._map.on('dragend', LeafletVelocity._clearAndRestart);
+			this._map.on('zoomstart', LeafletVelocity._windy.stop);
+			this._map.on('zoomend', LeafletVelocity._clearAndRestart);
 			this._map.on('resize', LeafletVelocity._clearWind);
 
 			this._initMouseHandler();
@@ -891,9 +893,14 @@ L.control.velocityPosition = function (options) {
 			}
 		},
 
+		_clearAndRestart: function _clearAndRestart() {
+			if (LeafletVelocity._context) LeafletVelocity._context.clearRect(0, 0, 3000, 3000);
+			if (LeafletVelocity._windy) LeafletVelocity._windy.start;
+		},
+
 		_clearWind: function _clearWind() {
-			if (this._windy) this._windy.stop();
-			if (this._context) this._context.clearRect(0, 0, 3000, 3000);
+			if (LeafletVelocity._windy) LeafletVelocity._windy.stop();
+			if (LeafletVelocity._context) LeafletVelocity._context.clearRect(0, 0, 3000, 3000);
 		},
 
 		_destroyWind: function _destroyWind() {
