@@ -48,6 +48,8 @@
 					LeafletVelocity._destroyWind();
 				}
 			});
+
+			return LeafletVelocity;
 		},
 
 		setTime: function (timeIso) {
@@ -59,7 +61,7 @@
 		onDrawLayer: function(overlay, params) {
 
 			if (!LeafletVelocity._windy) {
-				LeafletVelocity._initWindy(LeafletVelocity._data);
+				LeafletVelocity._initWindy(LeafletVelocity);
 				return;
 			}
 
@@ -86,15 +88,17 @@
 		},
 
 
-		_initWindy: function(data) {
+		_initWindy: function(LeafletVelocity) {
 
 			console.log('init windy');
-			console.log(data);
 			console.log(LeafletVelocity);
 
-
 			// windy object
-			this._windy = new Windy({ canvas: LeafletVelocity._canvasLayer._canvas, data: data });
+			this._windy = new Windy({
+				canvas: LeafletVelocity._canvasLayer._canvas,
+				data: LeafletVelocity._data,
+				maxVelocity: LeafletVelocity._options.maxVelocity || 10
+			});
 
 			// prepare context global var, start drawing
 			this._context = this._canvasLayer._canvas.getContext('2d');

@@ -169,7 +169,9 @@ L.canvasLayer = function () {
 var Windy = function Windy(params) {
 
 	var INTENSITY_SCALE_STEP = 15; // step size of particle intensity color scale
-	var MAX_WIND_INTENSITY = 10; // wind velocity at which particle intensity is maximum (m/s)
+	var MAX_WIND_INTENSITY = params.maxVelocity; // velocity at which particle intensity is maximum (m/s)
+
+	console.log('MAX_WIND_INTENSITY ' + MAX_WIND_INTENSITY);
 
 	var VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
 	var MAX_PARTICLE_AGE = 90; // max number of frames a particle is drawn before regeneration
@@ -759,6 +761,8 @@ L.control.velocityPosition = function (options) {
 					LeafletVelocity._destroyWind();
 				}
 			});
+
+			return LeafletVelocity;
 		},
 
 		setTime: function setTime(timeIso) {
@@ -770,7 +774,7 @@ L.control.velocityPosition = function (options) {
 		onDrawLayer: function onDrawLayer(overlay, params) {
 
 			if (!LeafletVelocity._windy) {
-				LeafletVelocity._initWindy(LeafletVelocity._data);
+				LeafletVelocity._initWindy(LeafletVelocity);
 				return;
 			}
 
@@ -786,14 +790,17 @@ L.control.velocityPosition = function (options) {
 			}, 750); // showing wind is delayed
 		},
 
-		_initWindy: function _initWindy(data) {
+		_initWindy: function _initWindy(LeafletVelocity) {
 
 			console.log('init windy');
-			console.log(data);
 			console.log(LeafletVelocity);
 
 			// windy object
-			this._windy = new Windy({ canvas: LeafletVelocity._canvasLayer._canvas, data: data });
+			this._windy = new Windy({
+				canvas: LeafletVelocity._canvasLayer._canvas,
+				data: LeafletVelocity._data,
+				maxVelocity: LeafletVelocity._options.maxVelocity || 10
+			});
 
 			// prepare context global var, start drawing
 			this._context = this._canvasLayer._canvas.getContext('2d');

@@ -18,7 +18,8 @@ LeafletVelocity.init({
 		displayEmptyString: 'No velocity data'
 	},
 	overlayName: 'velocity', // label for overlay control
-	data: data // see demo/velocity.json
+	data: data, // see demo/velocity.json,
+    maxVelocity: 10 // used to align color scale, i.e. ocean currents typically lower than wind velocity
 });
 ```
 
