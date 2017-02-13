@@ -90,10 +90,10 @@ L.VelocityLayer = L.Layer.extend({
 	},
 
 	_initMouseHandler: function() {
-		if (!this._mouseControl && this.displayValues) {
-			var options = this.displayOptions || {};
+		if (!this._mouseControl && this.options.displayValues) {
+			var options = this.options.displayOptions || {};
 			options['leafletVelocity'] = this;
-			this._mouseControl = L.control.velocityPosition(options).addTo(this._map);
+			this._mouseControl = L.control.velocity(options).addTo(this._map);
 		}
 	},
 

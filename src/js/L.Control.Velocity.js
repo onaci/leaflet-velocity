@@ -1,4 +1,4 @@
-L.Control.VelocityPosition = L.Control.extend({
+L.Control.Velocity = L.Control.extend({
 
     options: {
         position: 'bottomleft',
@@ -6,7 +6,7 @@ L.Control.VelocityPosition = L.Control.extend({
     },
 
     onAdd: function (map) {
-        this._container = L.DomUtil.create('div', 'leaflet-control-velocity-position');
+        this._container = L.DomUtil.create('div', 'leaflet-control-velocity');
         L.DomEvent.disableClickPropagation(this._container);
         map.on('mousemove', this._onMouseMove, this);
         this._container.innerHTML=this.options.emptyString;
@@ -54,8 +54,8 @@ L.Control.VelocityPosition = L.Control.extend({
 	    self._container.innerHTML = htmlOut;
 
         // move control to bottom row
-        if($('.leaflet-control-velocity-position').index() == 0){
-            $('.leaflet-control-velocity-position').insertAfter('.leaflet-control-mouseposition');
+        if($('.leaflet-control-velocity').index() == 0){
+            $('.leaflet-control-velocity').insertAfter('.leaflet-control-mouseposition');
         }
 
     }
@@ -73,6 +73,6 @@ L.Map.addInitHook(function () {
     }
 });
 
-L.control.velocityPosition = function (options) {
-    return new L.Control.VelocityPosition(options);
+L.control.velocity = function (options) {
+    return new L.Control.Velocity(options);
 };

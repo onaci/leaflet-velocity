@@ -19,7 +19,6 @@ L.DomUtil.setTransform = L.DomUtil.setTransform || function (el, offset, scale) 
 L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 	// -- initialized is called on prototype
 	initialize: function initialize(options) {
-		console.log('initialize');
 		this._map = null;
 		this._canvas = null;
 		this._frame = null;
@@ -28,13 +27,11 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 	},
 
 	delegate: function delegate(del) {
-		console.log('delegate');
 		this._delegate = del;
 		return this;
 	},
 
 	needRedraw: function needRedraw() {
-		console.log('needRedraw');
 		if (!this._frame) {
 			this._frame = L.Util.requestAnimFrame(this.drawLayer, this);
 		}
@@ -66,7 +63,6 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 	},
 	//-------------------------------------------------------------
 	onAdd: function onAdd(map) {
-		console.log('onAdd');
 		this._map = map;
 		this._canvas = L.DomUtil.create('canvas', 'leaflet-layer');
 		this.tiles = {};
@@ -156,7 +152,7 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 L.canvasLayer = function () {
 	return new L.CanvasLayer();
 };
-L.Control.VelocityPosition = L.Control.extend({
+L.Control.Velocity = L.Control.extend({
 
 	options: {
 		position: 'bottomleft',
@@ -164,7 +160,7 @@ L.Control.VelocityPosition = L.Control.extend({
 	},
 
 	onAdd: function onAdd(map) {
-		this._container = L.DomUtil.create('div', 'leaflet-control-velocity-position');
+		this._container = L.DomUtil.create('div', 'leaflet-control-velocity');
 		L.DomEvent.disableClickPropagation(this._container);
 		map.on('mousemove', this._onMouseMove, this);
 		this._container.innerHTML = this.options.emptyString;
@@ -209,8 +205,8 @@ L.Control.VelocityPosition = L.Control.extend({
 		self._container.innerHTML = htmlOut;
 
 		// move control to bottom row
-		if ($('.leaflet-control-velocity-position').index() == 0) {
-			$('.leaflet-control-velocity-position').insertAfter('.leaflet-control-mouseposition');
+		if ($('.leaflet-control-velocity').index() == 0) {
+			$('.leaflet-control-velocity').insertAfter('.leaflet-control-mouseposition');
 		}
 	}
 
@@ -227,8 +223,8 @@ L.Map.addInitHook(function () {
 	}
 });
 
-L.control.velocityPosition = function (options) {
-	return new L.Control.VelocityPosition(options);
+L.control.velocity = function (options) {
+	return new L.Control.Velocity(options);
 };
 
 L.VelocityLayer = L.Layer.extend({
@@ -312,10 +308,10 @@ L.VelocityLayer = L.Layer.extend({
 	},
 
 	_initMouseHandler: function _initMouseHandler() {
-		if (!this._mouseControl && this.displayValues) {
-			var options = this.displayOptions || {};
+		if (!this._mouseControl && this.options.displayValues) {
+			var options = this.options.displayOptions || {};
 			options['leafletVelocity'] = this;
-			this._mouseControl = L.control.velocityPosition(options).addTo(this._map);
+			this._mouseControl = L.control.velocity(options).addTo(this._map);
 		}
 	},
 
