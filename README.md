@@ -1,6 +1,8 @@
 # leaflet-velocity [![NPM version][npm-image]][npm-url]
 A plugin for Leaflet (v1.0.3, and v0.7.7) to create a canvas visualisation layer for direction and intensity of arbitrary velocities (e.g. wind, ocean current).
 
+https://danwild.github.io/leaflet-velocity/
+
 - Uses a modified version of [WindJS](https://github.com/Esri/wind-js) for core functionality.
 - Similar to [wind-js-leaflet](https://github.com/danwild/wind-js-leaflet), however much more versatile (provides a generic leaflet layer, and not restricted to wind).
 - Data input format is the same as output by [wind-js-server](https://github.com/danwild/wind-js-server), using [grib2json](https://github.com/cambecc/grib2json).
