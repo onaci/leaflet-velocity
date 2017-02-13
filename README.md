@@ -14,6 +14,7 @@ Live Demo: https://danwild.github.io/leaflet-velocity/
 var velocityLayer = L.velocityLayer({
 	displayValues: true,
 	displayOptions: {
+		velocityType: 'Global Wind',
 		displayPosition: 'bottomleft',
 		displayEmptyString: 'No velocity data'
 	},
