@@ -43,20 +43,18 @@ var layerControl = mapStuff.layerControl;
 // load data (u, v grids) from somewhere
 $.getJSON('velocity.json', function (data) {
 
-	// TODO handle multiple layers
-	LeafletVelocity.init({
-		map: map,
-		layerControl: layerControl,
+	var velocityLayer = L.velocityLayer({
 		displayValues: true,
 		displayOptions: {
 			displayPosition: 'bottomleft',
 			displayEmptyString: 'No velocity data'
 		},
-		overlayName: 'velocity',
 		data: data, // see demo/velocity.json,
 		maxVelocity: 10 // used to align color scale
 	});
 
+	layerControl.addOverlay(velocityLayer, 'my velocity layer');
+	velocityLayer.addTo(map);
 });
 
 

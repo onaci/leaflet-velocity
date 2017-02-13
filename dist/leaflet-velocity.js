@@ -1,7 +1,5 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 /*
  Generic  Canvas Layer for leaflet 0.7 and 1.0-rc,
  copyright Stanislav Sumbera,  2016 , sumbera.com , license MIT
@@ -21,6 +19,7 @@ L.DomUtil.setTransform = L.DomUtil.setTransform || function (el, offset, scale) 
 L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 	// -- initialized is called on prototype
 	initialize: function initialize(options) {
+		console.log('initialize');
 		this._map = null;
 		this._canvas = null;
 		this._frame = null;
@@ -29,11 +28,13 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 	},
 
 	delegate: function delegate(del) {
+		console.log('delegate');
 		this._delegate = del;
 		return this;
 	},
 
 	needRedraw: function needRedraw() {
+		console.log('needRedraw');
 		if (!this._frame) {
 			this._frame = L.Util.requestAnimFrame(this.drawLayer, this);
 		}
@@ -65,6 +66,7 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 	},
 	//-------------------------------------------------------------
 	onAdd: function onAdd(map) {
+		console.log('onAdd');
 		this._map = map;
 		this._canvas = L.DomUtil.create('canvas', 'leaflet-layer');
 		this.tiles = {};
@@ -154,6 +156,193 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 L.canvasLayer = function () {
 	return new L.CanvasLayer();
 };
+L.Control.VelocityPosition = L.Control.extend({
+
+	options: {
+		position: 'bottomleft',
+		emptyString: 'Unavailable'
+	},
+
+	onAdd: function onAdd(map) {
+		this._container = L.DomUtil.create('div', 'leaflet-control-velocity-position');
+		L.DomEvent.disableClickPropagation(this._container);
+		map.on('mousemove', this._onMouseMove, this);
+		this._container.innerHTML = this.options.emptyString;
+		return this._container;
+	},
+
+	onRemove: function onRemove(map) {
+		map.off('mousemove', this._onMouseMove, this);
+	},
+
+	vectorToSpeed: function vectorToSpeed(uMs, vMs) {
+		var velocityAbs = Math.sqrt(Math.pow(uMs, 2) + Math.pow(vMs, 2));
+		return velocityAbs;
+	},
+
+	vectorToDegrees: function vectorToDegrees(uMs, vMs) {
+		var velocityAbs = Math.sqrt(Math.pow(uMs, 2) + Math.pow(vMs, 2));
+		var velocityDirTrigTo = Math.atan2(uMs / velocityAbs, vMs / velocityAbs);
+		var velocityDirTrigToDegrees = velocityDirTrigTo * 180 / Math.PI;
+		var velocityDirTrigFromDegrees = velocityDirTrigToDegrees + 180;
+		return velocityDirTrigFromDegrees.toFixed(3);
+	},
+
+	_onMouseMove: function _onMouseMove(e) {
+
+		var self = this;
+		var pos = this.options.leafletVelocity._map.containerPointToLatLng(L.point(e.containerPoint.x, e.containerPoint.y));
+		var gridValue = this.options.leafletVelocity._windy.interpolatePoint(pos.lng, pos.lat);
+		var htmlOut = "";
+
+		if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
+
+			// vMs comes out upside-down..
+			var vMs = gridValue[1];
+			vMs = vMs > 0 ? vMs = vMs - vMs * 2 : Math.abs(vMs);
+
+			htmlOut = "<strong>Velocity Direction: </strong>" + self.vectorToDegrees(gridValue[0], vMs) + "°" + ", <strong>Velocity Speed: </strong>" + self.vectorToSpeed(gridValue[0], vMs).toFixed(1) + "m/s";
+		} else {
+			htmlOut = "no velocity data";
+		}
+
+		self._container.innerHTML = htmlOut;
+
+		// move control to bottom row
+		if ($('.leaflet-control-velocity-position').index() == 0) {
+			$('.leaflet-control-velocity-position').insertAfter('.leaflet-control-mouseposition');
+		}
+	}
+
+});
+
+L.Map.mergeOptions({
+	positionControl: false
+});
+
+L.Map.addInitHook(function () {
+	if (this.options.positionControl) {
+		this.positionControl = new L.Control.MousePosition();
+		this.addControl(this.positionControl);
+	}
+});
+
+L.control.velocityPosition = function (options) {
+	return new L.Control.VelocityPosition(options);
+};
+
+L.VelocityLayer = L.Layer.extend({
+
+	options: {
+		displayValues: true,
+		displayOptions: {
+			displayPosition: 'bottomleft',
+			displayEmptyString: 'No velocity data'
+		},
+		maxVelocity: 10, // used to align color scale
+		data: null
+	},
+
+	_map: null,
+	_canvasLayer: null,
+	_windy: null,
+	_context: null,
+	_timer: 0,
+	_mouseControl: null,
+
+	initialize: function initialize(options) {
+		L.setOptions(this, options);
+	},
+
+	onAdd: function onAdd(map) {
+		// create canvas, add overlay control
+		this._canvasLayer = L.canvasLayer().delegate(this);
+		this._canvasLayer.addTo(map);
+		this._map = map;
+	},
+
+	onRemove: function onRemove(map) {
+		this._destroyWind();
+	},
+
+	/*------------------------------------ PRIVATE ------------------------------------------*/
+
+	onDrawLayer: function onDrawLayer(overlay, params) {
+
+		var self = this;
+
+		if (!this._windy) {
+			this._initWindy(this);
+			return;
+		}
+
+		if (this._timer) clearTimeout(self._timer);
+
+		this._timer = setTimeout(function () {
+
+			var bounds = self._map.getBounds();
+			var size = self._map.getSize();
+
+			// bounds, width, height, extent
+			self._windy.start([[0, 0], [size.x, size.y]], size.x, size.y, [[bounds._southWest.lng, bounds._southWest.lat], [bounds._northEast.lng, bounds._northEast.lat]]);
+		}, 750); // showing velocity is delayed
+	},
+
+	_initWindy: function _initWindy(self) {
+
+		// windy object
+		this._windy = new Windy({
+			canvas: self._canvasLayer._canvas,
+			data: self.options.data,
+			maxVelocity: self.options.maxVelocity || 10
+		});
+
+		// prepare context global var, start drawing
+		this._context = this._canvasLayer._canvas.getContext('2d');
+		this._canvasLayer._canvas.classList.add("velocity-overlay");
+		this.onDrawLayer();
+
+		this._map.on('dragstart', self._windy.stop);
+		this._map.on('dragend', self._clearAndRestart);
+		this._map.on('zoomstart', self._windy.stop);
+		this._map.on('zoomend', self._clearAndRestart);
+		this._map.on('resize', self._clearWind);
+
+		this._initMouseHandler();
+	},
+
+	_initMouseHandler: function _initMouseHandler() {
+		if (!this._mouseControl && this.displayValues) {
+			var options = this.displayOptions || {};
+			options['leafletVelocity'] = this;
+			this._mouseControl = L.control.velocityPosition(options).addTo(this._map);
+		}
+	},
+
+	_clearAndRestart: function _clearAndRestart() {
+		if (this._context) this._context.clearRect(0, 0, 3000, 3000);
+		if (this._windy) this._windy.start;
+	},
+
+	_clearWind: function _clearWind() {
+		if (this._windy) this._windy.stop();
+		if (this._context) this._context.clearRect(0, 0, 3000, 3000);
+	},
+
+	_destroyWind: function _destroyWind() {
+		if (this._timer) clearTimeout(this._timer);
+		if (this._windy) this._windy.stop();
+		if (this._context) this._context.clearRect(0, 0, 3000, 3000);
+		if (this._mouseControl) this._map.removeControl(this._mouseControl);
+		this._mouseControl = null;
+		this._windy = null;
+		this._map.removeLayer(this._canvasLayer);
+	}
+});
+
+L.velocityLayer = function (options) {
+	return new L.VelocityLayer(options);
+};
 /*  Global class for simulating the movement of particle through a 1km wind grid
 
  credit: All the credit for this work goes to: https://github.com/cambecc for creating the repo:
@@ -168,15 +357,13 @@ L.canvasLayer = function () {
 
 var Windy = function Windy(params) {
 
-	var INTENSITY_SCALE_STEP = 15; // step size of particle intensity color scale
+	var INTENSITY_SCALE_STEP = params.maxVelocity; // step size of particle intensity color scale
 	var MAX_WIND_INTENSITY = params.maxVelocity; // velocity at which particle intensity is maximum (m/s)
-
-	console.log('MAX_WIND_INTENSITY ' + MAX_WIND_INTENSITY);
 
 	var VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
 	var MAX_PARTICLE_AGE = 90; // max number of frames a particle is drawn before regeneration
 	var PARTICLE_LINE_WIDTH = 1; // line width of a drawn particle
-	var PARTICLE_MULTIPLIER = 1 / 200; // particle count scalar (completely arbitrary--this values looks nice)
+	var PARTICLE_MULTIPLIER = 1 / 300; // particle count scalar (completely arbitrary--this values looks nice)
 	var PARTICLE_REDUCTION = Math.pow(window.devicePixelRatio, 1 / 3) || 1.6; // multiply particle count for mobiles by this amount
 	var FRAME_RATE = 15,
 	    FRAME_TIME = 1000 / FRAME_RATE; // desired frames per second
@@ -640,211 +827,3 @@ if (!window.cancelAnimationFrame) {
 		clearTimeout(id);
 	};
 }
-L.Control.VelocityPosition = L.Control.extend({
-
-	options: {
-		position: 'bottomleft',
-		emptyString: 'Unavailable'
-	},
-
-	onAdd: function onAdd(map) {
-		this._container = L.DomUtil.create('div', 'leaflet-control-velocity-position');
-		L.DomEvent.disableClickPropagation(this._container);
-		map.on('mousemove', this._onMouseMove, this);
-		this._container.innerHTML = this.options.emptyString;
-		return this._container;
-	},
-
-	onRemove: function onRemove(map) {
-		map.off('mousemove', this._onMouseMove, this);
-	},
-
-	vectorToSpeed: function vectorToSpeed(uMs, vMs) {
-		var velocityAbs = Math.sqrt(Math.pow(uMs, 2) + Math.pow(vMs, 2));
-		return velocityAbs;
-	},
-
-	vectorToDegrees: function vectorToDegrees(uMs, vMs) {
-		var velocityAbs = Math.sqrt(Math.pow(uMs, 2) + Math.pow(vMs, 2));
-		var velocityDirTrigTo = Math.atan2(uMs / velocityAbs, vMs / velocityAbs);
-		var velocityDirTrigToDegrees = velocityDirTrigTo * 180 / Math.PI;
-		var velocityDirTrigFromDegrees = velocityDirTrigToDegrees + 180;
-		return velocityDirTrigFromDegrees.toFixed(3);
-	},
-
-	_onMouseMove: function _onMouseMove(e) {
-
-		var self = this;
-		var pos = this.options.leafletVelocity._map.containerPointToLatLng(L.point(e.containerPoint.x, e.containerPoint.y));
-		var gridValue = this.options.leafletVelocity._windy.interpolatePoint(pos.lng, pos.lat);
-		var htmlOut = "";
-
-		if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-
-			// vMs comes out upside-down..
-			var vMs = gridValue[1];
-			vMs = vMs > 0 ? vMs = vMs - vMs * 2 : Math.abs(vMs);
-
-			htmlOut = "<strong>Velocity Direction: </strong>" + self.vectorToDegrees(gridValue[0], vMs) + "°" + ", <strong>Velocity Speed: </strong>" + self.vectorToSpeed(gridValue[0], vMs).toFixed(1) + "m/s";
-		} else {
-			htmlOut = "no velocity data";
-		}
-
-		self._container.innerHTML = htmlOut;
-
-		// move control to bottom row
-		if ($('.leaflet-control-velocity-position').index() == 0) {
-			$('.leaflet-control-velocity-position').insertAfter('.leaflet-control-mouseposition');
-		}
-	}
-
-});
-
-L.Map.mergeOptions({
-	positionControl: false
-});
-
-L.Map.addInitHook(function () {
-	if (this.options.positionControl) {
-		this.positionControl = new L.Control.MousePosition();
-		this.addControl(this.positionControl);
-	}
-});
-
-L.control.velocityPosition = function (options) {
-	return new L.Control.VelocityPosition(options);
-};
-
-(function (root, factory) {
-	if ((typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object') {
-
-		// CommonJS
-		module.exports = factory(require('leaflet-velocity'));
-	} else if (typeof define === 'function' && define.amd) {
-		// AMD
-		define(['leaflet-velocity'], function (LeafletVelocity) {
-			return root.returnExportsGlobal = factory(window);
-		});
-	} else {
-		// Global Variables
-		window.LeafletVelocity = factory(window);
-	}
-})(undefined, function (window) {
-
-	'use strict';
-
-	var LeafletVelocity = {
-
-		_map: null,
-		_data: null,
-		_options: null,
-		_canvasLayer: null,
-		_windy: null,
-		_context: null,
-		_timer: 0,
-		_mouseControl: null,
-
-		init: function init(options) {
-
-			// set properties
-			LeafletVelocity._map = options.map;
-			LeafletVelocity._data = options.data;
-			LeafletVelocity._options = options;
-
-			// create canvas, add overlay control
-			LeafletVelocity._canvasLayer = L.canvasLayer().delegate(LeafletVelocity);
-			LeafletVelocity._options.layerControl.addOverlay(LeafletVelocity._canvasLayer, options.overlayName || 'velocity');
-
-			// ensure clean up on deselect overlay
-			LeafletVelocity._map.on('overlayremove', function (e) {
-				if (e.layer == LeafletVelocity._canvasLayer) {
-					LeafletVelocity._destroyWind();
-				}
-			});
-
-			return LeafletVelocity;
-		},
-
-		setTime: function setTime(timeIso) {
-			LeafletVelocity._options.timeISO = timeIso;
-		},
-
-		/*------------------------------------ PRIVATE ------------------------------------------*/
-
-		onDrawLayer: function onDrawLayer(overlay, params) {
-
-			if (!LeafletVelocity._windy) {
-				LeafletVelocity._initWindy(LeafletVelocity);
-				return;
-			}
-
-			if (this._timer) clearTimeout(LeafletVelocity._timer);
-
-			this._timer = setTimeout(function () {
-
-				var bounds = LeafletVelocity._map.getBounds();
-				var size = LeafletVelocity._map.getSize();
-
-				// bounds, width, height, extent
-				LeafletVelocity._windy.start([[0, 0], [size.x, size.y]], size.x, size.y, [[bounds._southWest.lng, bounds._southWest.lat], [bounds._northEast.lng, bounds._northEast.lat]]);
-			}, 750); // showing wind is delayed
-		},
-
-		_initWindy: function _initWindy(LeafletVelocity) {
-
-			console.log('init windy');
-			console.log(LeafletVelocity);
-
-			// windy object
-			this._windy = new Windy({
-				canvas: LeafletVelocity._canvasLayer._canvas,
-				data: LeafletVelocity._data,
-				maxVelocity: LeafletVelocity._options.maxVelocity || 10
-			});
-
-			// prepare context global var, start drawing
-			this._context = this._canvasLayer._canvas.getContext('2d');
-			this._canvasLayer._canvas.classList.add("velocity-overlay");
-			this.onDrawLayer();
-
-			this._map.on('dragstart', LeafletVelocity._windy.stop);
-			this._map.on('dragend', LeafletVelocity._clearAndRestart);
-			this._map.on('zoomstart', LeafletVelocity._windy.stop);
-			this._map.on('zoomend', LeafletVelocity._clearAndRestart);
-			this._map.on('resize', LeafletVelocity._clearWind);
-
-			this._initMouseHandler();
-		},
-
-		_initMouseHandler: function _initMouseHandler() {
-			if (!this._mouseControl && this._options.displayValues) {
-				var options = this._options.displayOptions || {};
-				options['leafletVelocity'] = LeafletVelocity;
-				this._mouseControl = L.control.velocityPosition(options).addTo(this._map);
-			}
-		},
-
-		_clearAndRestart: function _clearAndRestart() {
-			if (LeafletVelocity._context) LeafletVelocity._context.clearRect(0, 0, 3000, 3000);
-			if (LeafletVelocity._windy) LeafletVelocity._windy.start;
-		},
-
-		_clearWind: function _clearWind() {
-			if (LeafletVelocity._windy) LeafletVelocity._windy.stop();
-			if (LeafletVelocity._context) LeafletVelocity._context.clearRect(0, 0, 3000, 3000);
-		},
-
-		_destroyWind: function _destroyWind() {
-			if (this._timer) clearTimeout(this._timer);
-			if (this._windy) this._windy.stop();
-			if (this._context) this._context.clearRect(0, 0, 3000, 3000);
-			if (this._mouseControl) this._map.removeControl(this._mouseControl);
-			this._mouseControl = null;
-			this._windy = null;
-			this._map.removeLayer(this._canvasLayer);
-		}
-
-	};
-
-	return LeafletVelocity;
-});

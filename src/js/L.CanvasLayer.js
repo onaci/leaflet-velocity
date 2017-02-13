@@ -22,6 +22,7 @@ L.DomUtil.setTransform = L.DomUtil.setTransform || function (el, offset, scale) 
 L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 	// -- initialized is called on prototype
 	initialize: function (options) {
+		console.log('initialize');
 		this._map    = null;
 		this._canvas = null;
 		this._frame  = null;
@@ -30,11 +31,13 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 	},
 
 	delegate :function(del){
+		console.log('delegate');
 		this._delegate = del;
 		return this;
 	},
 
 	needRedraw: function () {
+		console.log('needRedraw');
 		if (!this._frame) {
 			this._frame = L.Util.requestAnimFrame(this.drawLayer, this);
 		}
@@ -66,6 +69,7 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 	},
 	//-------------------------------------------------------------
 	onAdd: function (map) {
+		console.log('onAdd');
 		this._map = map;
 		this._canvas = L.DomUtil.create('canvas', 'leaflet-layer');
 		this.tiles = {};
