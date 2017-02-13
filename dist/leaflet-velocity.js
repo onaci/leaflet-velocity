@@ -197,9 +197,9 @@ L.Control.Velocity = L.Control.extend({
 			var vMs = gridValue[1];
 			vMs = vMs > 0 ? vMs = vMs - vMs * 2 : Math.abs(vMs);
 
-			htmlOut = "<strong>Velocity Direction: </strong>" + self.vectorToDegrees(gridValue[0], vMs) + "°" + ", <strong>Velocity Speed: </strong>" + self.vectorToSpeed(gridValue[0], vMs).toFixed(1) + "m/s";
+			htmlOut = "<strong>" + this.options.velocityType + " Direction: </strong>" + self.vectorToDegrees(gridValue[0], vMs) + "°" + ", <strong>" + this.options.velocityType + " Speed: </strong>" + self.vectorToSpeed(gridValue[0], vMs).toFixed(1) + "m/s";
 		} else {
-			htmlOut = "no velocity data";
+			htmlOut = this.options.displayEmptyString;
 		}
 
 		self._container.innerHTML = htmlOut;
@@ -232,6 +232,7 @@ L.VelocityLayer = L.Layer.extend({
 	options: {
 		displayValues: true,
 		displayOptions: {
+			velocityType: 'Velocity',
 			displayPosition: 'bottomleft',
 			displayEmptyString: 'No velocity data'
 		},

@@ -3,6 +3,7 @@ L.VelocityLayer = L.Layer.extend({
 	options: {
 		displayValues: true,
 		displayOptions: {
+			velocityType: 'Velocity',
 			displayPosition: 'bottomleft',
 			displayEmptyString: 'No velocity data'
 		},
