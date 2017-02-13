@@ -1,7 +1,7 @@
 {
   "name": "leaflet-velocity",
-  "version": "0.0.3",
-  "description": "A plugin for Leaflet (v1.0.3, and v0.7.7) to add visualisation overlay for direction and intensity of arbitrary velocities (e.g. wind, ocean current).",
+  "version": "0.0.4",
+  "description": "A custom layer for leaflet to visualise arbitrary velocities",
   "main": "dist/leaflet-velocity.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
