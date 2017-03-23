@@ -405,10 +405,14 @@ var Windy = function Windy(params) {
 
 		data.forEach(function (record) {
 			switch (record.header.parameterCategory + "," + record.header.parameterNumber) {
+				case "1,2":
 				case "2,2":
-					uComp = record;break;
+					uComp = record;
+					break;
+				case "1,3":
 				case "2,3":
-					vComp = record;break;
+					vComp = record;
+					break;
 				default:
 					scalar = record;
 			}
