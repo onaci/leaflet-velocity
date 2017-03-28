@@ -262,10 +262,20 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 		this._destroyWind();
 	},
 
+	setData: function setData(data) {
+		this.options.data = data;
+
+		if (this._windy) {
+			this._windy.setData(data);
+			this._clearAndRestart();
+		}
+
+		this.fire('load');
+	},
+
 	/*------------------------------------ PRIVATE ------------------------------------------*/
 
 	onDrawLayer: function onDrawLayer(overlay, params) {
-
 		var self = this;
 
 		if (!this._windy) {
@@ -273,16 +283,23 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 			return;
 		}
 
+		if (!this.options.data) {
+			return;
+		}
+
 		if (this._timer) clearTimeout(self._timer);
 
 		this._timer = setTimeout(function () {
-
-			var bounds = self._map.getBounds();
-			var size = self._map.getSize();
-
-			// bounds, width, height, extent
-			self._windy.start([[0, 0], [size.x, size.y]], size.x, size.y, [[bounds._southWest.lng, bounds._southWest.lat], [bounds._northEast.lng, bounds._northEast.lat]]);
+			self._startWindy();
 		}, 750); // showing velocity is delayed
+	},
+
+	_startWindy: function _startWindy() {
+		var bounds = this._map.getBounds();
+		var size = this._map.getSize();
+
+		// bounds, width, height, extent
+		this._windy.start([[0, 0], [size.x, size.y]], size.x, size.y, [[bounds._southWest.lng, bounds._southWest.lat], [bounds._northEast.lng, bounds._northEast.lat]]);
 	},
 
 	_initWindy: function _initWindy(self) {
@@ -318,7 +335,7 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
 	_clearAndRestart: function _clearAndRestart() {
 		if (this._context) this._context.clearRect(0, 0, 3000, 3000);
-		if (this._windy) this._windy.start;
+		if (this._windy) this._startWindy();
 	},
 
 	_clearWind: function _clearWind() {
@@ -369,8 +386,13 @@ var Windy = function Windy(params) {
 
 	var builder;
 	var grid;
+	var gridData = params.data;
 	var date;
 	var λ0, φ0, Δλ, Δφ, ni, nj;
+
+	var setData = function setData(data) {
+		gridData = data;
+	};
 
 	// interpolation for vectors like wind (u,v,m)
 	var bilinearInterpolateVector = function bilinearInterpolateVector(x, y, g00, g10, g01, g11) {
@@ -793,7 +815,7 @@ var Windy = function Windy(params) {
 		stop();
 
 		// build grid
-		buildGrid(params.data, function (grid) {
+		buildGrid(gridData, function (grid) {
 			// interpolateField
 			interpolateField(grid, buildBounds(bounds, width, height), mapBounds, function (bounds, field) {
 				// animate the canvas with random points
@@ -813,7 +835,8 @@ var Windy = function Windy(params) {
 		start: start,
 		stop: stop,
 		createField: createField,
-		interpolatePoint: interpolate
+		interpolatePoint: interpolate,
+		setData: setData
 	};
 
 	return windy;

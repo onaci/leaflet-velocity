@@ -26,8 +26,13 @@ var Windy = function( params ){
 
 	var builder;
 	var grid;
+	var gridData = params.data;
 	var date;
 	var λ0, φ0, Δλ, Δφ, ni, nj;
+
+	var setData = function (data) {
+		gridData = data;
+	};
 
 	// interpolation for vectors like wind (u,v,m)
 	var bilinearInterpolateVector = function(x, y, g00, g10, g01, g11) {
@@ -458,7 +463,7 @@ var Windy = function( params ){
 		stop();
 
 		// build grid
-		buildGrid( params.data, function(grid){
+		buildGrid(gridData, function(grid){
 			// interpolateField
 			interpolateField( grid, buildBounds( bounds, width, height), mapBounds, function( bounds, field ){
 				// animate the canvas with random points
@@ -479,7 +484,8 @@ var Windy = function( params ){
 		start: start,
 		stop: stop,
 		createField: createField,
-		interpolatePoint: interpolate
+		interpolatePoint: interpolate,
+		setData: setData
 	};
 
 	return windy;
