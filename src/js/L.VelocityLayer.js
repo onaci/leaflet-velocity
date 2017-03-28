@@ -33,10 +33,20 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 		this._destroyWind();
 	},
 
+	setData: function setData(data) {
+		this.options.data = data;
+
+		if (this._windy) {
+			this._windy.setData(data);
+			this._clearAndRestart();
+		}
+
+		this.fire('load');
+	},
+
 	/*------------------------------------ PRIVATE ------------------------------------------*/
 
 	onDrawLayer: function(overlay, params) {
-
 		var self = this;
 
 		if (!this._windy) {
@@ -44,28 +54,34 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 			return;
 		}
 
+		if (!this.options.data) {
+			return;
+		}
+
 		if (this._timer) clearTimeout(self._timer);
 
 		this._timer = setTimeout(function () {
-
-			var bounds = self._map.getBounds();
-			var size = self._map.getSize();
-
-			// bounds, width, height, extent
-			self._windy.start(
-				[
-					[0, 0],
-					[size.x, size.y]
-				],
-				size.x,
-				size.y,
-				[
-					[bounds._southWest.lng, bounds._southWest.lat],
-					[bounds._northEast.lng, bounds._northEast.lat]
-				]);
+			self._startWindy();
 		}, 750); // showing velocity is delayed
 	},
 
+	_startWindy: function() {
+		var bounds = this._map.getBounds();
+		var size = this._map.getSize();
+
+		// bounds, width, height, extent
+		this._windy.start(
+			[
+				[0, 0],
+				[size.x, size.y]
+			],
+			size.x,
+			size.y,
+			[
+				[bounds._southWest.lng, bounds._southWest.lat],
+				[bounds._northEast.lng, bounds._northEast.lat]
+			]);
+	},
 
 	_initWindy: function(self) {
 
@@ -100,7 +116,7 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
 	_clearAndRestart: function(){
 		if (this._context) this._context.clearRect(0, 0, 3000, 3000);
-		if(this._windy) this._windy.start;
+		if (this._windy) this._startWindy();
 	},
 
 	_clearWind: function() {
