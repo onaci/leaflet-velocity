@@ -227,7 +227,7 @@ L.control.velocity = function (options) {
 	return new L.Control.Velocity(options);
 };
 
-L.VelocityLayer = L.Layer.extend({
+L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
 	options: {
 		displayValues: true,
