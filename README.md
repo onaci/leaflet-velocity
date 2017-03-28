@@ -19,7 +19,9 @@ var velocityLayer = L.velocityLayer({
 		displayEmptyString: 'No velocity data'
 	},
 	data: data, // see demo/*.json, or wind-js-server for example data service
+	minVelocity: 0 // defaults to 0
 	maxVelocity: 10 // used to align color scale, i.e. ocean currents typically lower than wind velocity
+	colorScale: [] // optional, supply an array of hex/rgb colors
 });
 ```
 

@@ -12,8 +12,8 @@
 
 var Windy = function( params ){
 
-	var INTENSITY_SCALE_STEP = params.maxVelocity;                                               // step size of particle intensity color scale
-	var MAX_WIND_INTENSITY = params.maxVelocity;                                 // velocity at which particle intensity is maximum (m/s)
+	var MIN_VELOCITY_INTENSITY = params.minVelocity;
+	var MAX_VELOCITY_INTENSITY = params.maxVelocity;                             // velocity at which particle intensity is maximum (m/s)
 
 	const VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio,1/3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
 	const MAX_PARTICLE_AGE = 90;                                                 // max number of frames a particle is drawn before regeneration
@@ -21,6 +21,26 @@ var Windy = function( params ){
 	const PARTICLE_MULTIPLIER = 1 / 300;                                         // particle count scalar (completely arbitrary--this values looks nice)
 	const PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio,1/3) || 1.6);   // multiply particle count for mobiles by this amount
 	const FRAME_RATE = 15, FRAME_TIME = 1000 / FRAME_RATE;                       // desired frames per second
+
+	var defaulColorScale = [
+		"rgb(36,104, 180)",
+		"rgb(60,157, 194)",
+		"rgb(128,205,193 )",
+		"rgb(151,218,168 )",
+		"rgb(198,231,181)",
+		"rgb(238,247,217)",
+		"rgb(255,238,159)",
+		"rgb(252,217,125)",
+		"rgb(255,182,100)",
+		"rgb(252,150,75)",
+		"rgb(250,112,52)",
+		"rgb(245,64,32)",
+		"rgb(237,45,28)",
+		"rgb(220,24,32)",
+		"rgb(180,0,35)"
+	];
+
+	const colorScale = params.colorScale || defaulColorScale;
 
 	var NULL_WIND_VECTOR = [NaN, NaN, null];  // singleton for no wind in the form: [u, v, magnitude]
 
@@ -329,33 +349,21 @@ var Windy = function( params ){
 	var animationLoop;
 	var animate = function(bounds, field) {
 
-		function windIntensityColorScale(step, maxWind) {
+		function windIntensityColorScale(min, max) {
 
-			var result = [
-				"rgb(36,104, 180)",
-				"rgb(60,157, 194)",
-				"rgb(128,205,193 )",
-				"rgb(151,218,168 )",
-				"rgb(198,231,181)",
-				"rgb(238,247,217)",
-				"rgb(255,238,159)",
-				"rgb(252,217,125)",
-				"rgb(255,182,100)",
-				"rgb(252,150,75)",
-				"rgb(250,112,52)",
-				"rgb(245,64,32)",
-				"rgb(237,45,28)",
-				"rgb(220,24,32)",
-				"rgb(180,0,35)"
-			];
+			colorScale.indexFor = function (m) {  // map velocity speed to a style
+				return Math.max(0, Math.min((colorScale.length - 1),
+					Math.round((m - min) / (max - min) * (colorScale.length - 1))));
 
-			result.indexFor = function(m) {  // map wind speed to a style
-				return Math.floor(Math.min(m, maxWind) / maxWind * (result.length - 1));
 			};
-			return result;
+
+			//colorScale.indexFor = function(m) {  // map wind speed to a style
+			//	return Math.floor(Math.min(m, max) / max * (colorScale.length - 1));
+			//};
+			return colorScale;
 		}
 
-		var colorStyles = windIntensityColorScale(INTENSITY_SCALE_STEP, MAX_WIND_INTENSITY);
+		var colorStyles = windIntensityColorScale(MIN_VELOCITY_INTENSITY, MAX_VELOCITY_INTENSITY);
 		var buckets = colorStyles.map(function() { return []; });
 
 		var particleCount = Math.round(bounds.width * bounds.height * PARTICLE_MULTIPLIER);

@@ -8,6 +8,7 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 			displayEmptyString: 'No velocity data'
 		},
 		maxVelocity: 10, // used to align color scale
+		colorScale: null,
 		data: null
 	},
 
@@ -73,7 +74,9 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 		this._windy = new Windy({
 			canvas: self._canvasLayer._canvas,
 			data: self.options.data,
-			maxVelocity: self.options.maxVelocity || 10
+			minVelocity: self.options.minVelocity || 0,
+			maxVelocity: self.options.maxVelocity || 10,
+			colorScale: self.options.colorScale || null
 		});
 
 		// prepare context global var, start drawing
