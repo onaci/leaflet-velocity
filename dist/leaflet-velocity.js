@@ -227,7 +227,7 @@ L.control.velocity = function (options) {
 	return new L.Control.Velocity(options);
 };
 
-L.VelocityLayer = L.Layer.extend({
+L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
 	options: {
 		displayValues: true,
@@ -237,6 +237,7 @@ L.VelocityLayer = L.Layer.extend({
 			displayEmptyString: 'No velocity data'
 		},
 		maxVelocity: 10, // used to align color scale
+		colorScale: null,
 		data: null
 	},
 
@@ -262,10 +263,20 @@ L.VelocityLayer = L.Layer.extend({
 		this._destroyWind();
 	},
 
+	setData: function setData(data) {
+		this.options.data = data;
+
+		if (this._windy) {
+			this._windy.setData(data);
+			this._clearAndRestart();
+		}
+
+		this.fire('load');
+	},
+
 	/*------------------------------------ PRIVATE ------------------------------------------*/
 
 	onDrawLayer: function onDrawLayer(overlay, params) {
-
 		var self = this;
 
 		if (!this._windy) {
@@ -273,16 +284,23 @@ L.VelocityLayer = L.Layer.extend({
 			return;
 		}
 
+		if (!this.options.data) {
+			return;
+		}
+
 		if (this._timer) clearTimeout(self._timer);
 
 		this._timer = setTimeout(function () {
-
-			var bounds = self._map.getBounds();
-			var size = self._map.getSize();
-
-			// bounds, width, height, extent
-			self._windy.start([[0, 0], [size.x, size.y]], size.x, size.y, [[bounds._southWest.lng, bounds._southWest.lat], [bounds._northEast.lng, bounds._northEast.lat]]);
+			self._startWindy();
 		}, 750); // showing velocity is delayed
+	},
+
+	_startWindy: function _startWindy() {
+		var bounds = this._map.getBounds();
+		var size = this._map.getSize();
+
+		// bounds, width, height, extent
+		this._windy.start([[0, 0], [size.x, size.y]], size.x, size.y, [[bounds._southWest.lng, bounds._southWest.lat], [bounds._northEast.lng, bounds._northEast.lat]]);
 	},
 
 	_initWindy: function _initWindy(self) {
@@ -291,7 +309,10 @@ L.VelocityLayer = L.Layer.extend({
 		this._windy = new Windy({
 			canvas: self._canvasLayer._canvas,
 			data: self.options.data,
-			maxVelocity: self.options.maxVelocity || 10
+			velocityScale: self.options.velocityScale || 0.005,
+			minVelocity: self.options.minVelocity || 0,
+			maxVelocity: self.options.maxVelocity || 10,
+			colorScale: self.options.colorScale || null
 		});
 
 		// prepare context global var, start drawing
@@ -318,7 +339,7 @@ L.VelocityLayer = L.Layer.extend({
 
 	_clearAndRestart: function _clearAndRestart() {
 		if (this._context) this._context.clearRect(0, 0, 3000, 3000);
-		if (this._windy) this._windy.start;
+		if (this._windy) this._startWindy();
 	},
 
 	_clearWind: function _clearWind() {
@@ -354,10 +375,9 @@ L.velocityLayer = function (options) {
 
 var Windy = function Windy(params) {
 
-	var INTENSITY_SCALE_STEP = params.maxVelocity; // step size of particle intensity color scale
-	var MAX_WIND_INTENSITY = params.maxVelocity; // velocity at which particle intensity is maximum (m/s)
-
-	var VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
+	var MIN_VELOCITY_INTENSITY = params.minVelocity; // velocity at which particle intensity is minimum (m/s)
+	var MAX_VELOCITY_INTENSITY = params.maxVelocity; // velocity at which particle intensity is maximum (m/s)
+	var VELOCITY_SCALE = params.velocityScale * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
 	var MAX_PARTICLE_AGE = 90; // max number of frames a particle is drawn before regeneration
 	var PARTICLE_LINE_WIDTH = 1; // line width of a drawn particle
 	var PARTICLE_MULTIPLIER = 1 / 300; // particle count scalar (completely arbitrary--this values looks nice)
@@ -365,12 +385,21 @@ var Windy = function Windy(params) {
 	var FRAME_RATE = 15,
 	    FRAME_TIME = 1000 / FRAME_RATE; // desired frames per second
 
+	var defaulColorScale = ["rgb(36,104, 180)", "rgb(60,157, 194)", "rgb(128,205,193 )", "rgb(151,218,168 )", "rgb(198,231,181)", "rgb(238,247,217)", "rgb(255,238,159)", "rgb(252,217,125)", "rgb(255,182,100)", "rgb(252,150,75)", "rgb(250,112,52)", "rgb(245,64,32)", "rgb(237,45,28)", "rgb(220,24,32)", "rgb(180,0,35)"];
+
+	var colorScale = params.colorScale || defaulColorScale;
+
 	var NULL_WIND_VECTOR = [NaN, NaN, null]; // singleton for no wind in the form: [u, v, magnitude]
 
 	var builder;
 	var grid;
+	var gridData = params.data;
 	var date;
 	var λ0, φ0, Δλ, Δφ, ni, nj;
+
+	var setData = function setData(data) {
+		gridData = data;
+	};
 
 	// interpolation for vectors like wind (u,v,m)
 	var bilinearInterpolateVector = function bilinearInterpolateVector(x, y, g00, g10, g01, g11) {
@@ -405,10 +434,14 @@ var Windy = function Windy(params) {
 
 		data.forEach(function (record) {
 			switch (record.header.parameterCategory + "," + record.header.parameterNumber) {
+				case "1,2":
 				case "2,2":
-					uComp = record;break;
+					uComp = record;
+					break;
+				case "1,3":
 				case "2,3":
-					vComp = record;break;
+					vComp = record;
+					break;
 				default:
 					scalar = record;
 			}
@@ -677,18 +710,17 @@ var Windy = function Windy(params) {
 	var animationLoop;
 	var animate = function animate(bounds, field) {
 
-		function windIntensityColorScale(step, maxWind) {
+		function windIntensityColorScale(min, max) {
 
-			var result = ["rgb(36,104, 180)", "rgb(60,157, 194)", "rgb(128,205,193 )", "rgb(151,218,168 )", "rgb(198,231,181)", "rgb(238,247,217)", "rgb(255,238,159)", "rgb(252,217,125)", "rgb(255,182,100)", "rgb(252,150,75)", "rgb(250,112,52)", "rgb(245,64,32)", "rgb(237,45,28)", "rgb(220,24,32)", "rgb(180,0,35)"];
-
-			result.indexFor = function (m) {
-				// map wind speed to a style
-				return Math.floor(Math.min(m, maxWind) / maxWind * (result.length - 1));
+			colorScale.indexFor = function (m) {
+				// map velocity speed to a style
+				return Math.max(0, Math.min(colorScale.length - 1, Math.round((m - min) / (max - min) * (colorScale.length - 1))));
 			};
-			return result;
+
+			return colorScale;
 		}
 
-		var colorStyles = windIntensityColorScale(INTENSITY_SCALE_STEP, MAX_WIND_INTENSITY);
+		var colorStyles = windIntensityColorScale(MIN_VELOCITY_INTENSITY, MAX_VELOCITY_INTENSITY);
 		var buckets = colorStyles.map(function () {
 			return [];
 		});
@@ -793,7 +825,7 @@ var Windy = function Windy(params) {
 		stop();
 
 		// build grid
-		buildGrid(params.data, function (grid) {
+		buildGrid(gridData, function (grid) {
 			// interpolateField
 			interpolateField(grid, buildBounds(bounds, width, height), mapBounds, function (bounds, field) {
 				// animate the canvas with random points
@@ -813,7 +845,8 @@ var Windy = function Windy(params) {
 		start: start,
 		stop: stop,
 		createField: createField,
-		interpolatePoint: interpolate
+		interpolatePoint: interpolate,
+		setData: setData
 	};
 
 	return windy;

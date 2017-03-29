@@ -67,7 +67,8 @@ $.getJSON('water-gbr.json', function (data) {
 			displayEmptyString: 'No water data'
 		},
 		data: data,
-		maxVelocity: 0.6
+		maxVelocity: 0.6,
+		velocityScale: 0.10
 	});
 
 	layerControl.addOverlay(velocityLayer, 'Ocean Current - Great Barrier Reef');
