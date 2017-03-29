@@ -668,7 +668,8 @@ var Windy = function Windy(params) {
 	var interpolateField = function interpolateField(grid, bounds, extent, callback) {
 
 		var projection = {};
-		var velocityScale = VELOCITY_SCALE;
+		var mapArea = (extent.south - extent.north) * (extent.west - extent.east);
+		var velocityScale = VELOCITY_SCALE * Math.pow(mapArea, 0.4);
 
 		var columns = [];
 		var x = bounds.x;
