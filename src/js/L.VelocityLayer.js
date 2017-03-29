@@ -90,6 +90,7 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 		this._windy = new Windy({
 			canvas: self._canvasLayer._canvas,
 			data: self.options.data,
+			velocityScale: self.options.velocityScale || 0.005,
 			minVelocity: self.options.minVelocity || 0,
 			maxVelocity: self.options.maxVelocity || 10,
 			colorScale: self.options.colorScale || null
