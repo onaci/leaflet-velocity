@@ -207,7 +207,7 @@ L.Control.Velocity = L.Control.extend({
 		if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
 			htmlOut = "<strong>" + this.options.velocityType + " Direction: </strong>" + self.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention).toFixed(3) + "°" + ", <strong>" + this.options.velocityType + " Speed: </strong>" + self.vectorToSpeed(gridValue[0], gridValue[1]).toFixed(1) + "m/s";
 		} else {
-			htmlOut = this.options.displayEmptyString;
+			htmlOut = this.options.emptyString;
 		}
 
 		self._container.innerHTML = htmlOut;
@@ -241,8 +241,8 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 		displayValues: true,
 		displayOptions: {
 			velocityType: 'Velocity',
-			displayPosition: 'bottomleft',
-			displayEmptyString: 'No velocity data'
+			position: 'bottomleft',
+			emptyString: 'No velocity data'
 		},
 		maxVelocity: 10, // used to align color scale
 		colorScale: null,

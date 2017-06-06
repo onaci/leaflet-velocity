@@ -56,7 +56,7 @@ L.Control.Velocity = L.Control.extend({
 			    ", <strong>"+ this.options.velocityType +" Speed: </strong>" + self.vectorToSpeed(gridValue[0],gridValue[1]).toFixed(1) + "m/s";
 	    }
 	    else {
-		    htmlOut = this.options.displayEmptyString;
+		    htmlOut = this.options.emptyString;
 	    }
 
 	    self._container.innerHTML = htmlOut;
