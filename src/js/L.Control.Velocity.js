@@ -2,7 +2,10 @@ L.Control.Velocity = L.Control.extend({
 
     options: {
         position: 'bottomleft',
-        emptyString: 'Unavailable'
+        emptyString: 'Unavailable',
+        // Could be any combination of 'bearing' (angle toward which the flow goes) or 'meteo' (angle from which the flow comes)
+        // and 'CW' (angle value increases clock-wise) or 'CCW' (angle value increases counter clock-wise)
+        angleConvention: 'bearingCCW'
     },
 
     onAdd: function (map) {
@@ -22,12 +25,22 @@ L.Control.Velocity = L.Control.extend({
         return velocityAbs;
     },
 
-    vectorToDegrees: function(uMs, vMs){
+    vectorToDegrees: function(uMs, vMs, angleConvention){
+        // Default angle convention is CW
+        if (angleConvention.endsWith('CCW')) {
+            // vMs comes out upside-down..
+            vMs = (vMs > 0 ? vMs = -vMs : Math.abs(vMs));
+        }
         var velocityAbs = Math.sqrt( Math.pow(uMs, 2) + Math.pow(vMs, 2) );
-        var velocityDirTrigTo = Math.atan2(uMs/velocityAbs, vMs/velocityAbs);
-        var velocityDirTrigToDegrees = velocityDirTrigTo * 180/Math.PI;
-        var velocityDirTrigFromDegrees = velocityDirTrigToDegrees + 180;
-        return velocityDirTrigFromDegrees.toFixed(3);
+        var velocityDir = Math.atan2(uMs/velocityAbs, vMs/velocityAbs);
+        var velocityDirToDegrees = velocityDir * 180/Math.PI + 180;
+        
+        if (angleConvention === 'bearingCW' || angleConvention === 'meteoCCW') {
+            velocityDirToDegrees += 180;
+            if (velocityDirToDegrees >= 360) velocityDirToDegrees -= 360;
+        }
+        
+        return velocityDirToDegrees;
     },
 
     _onMouseMove: function (e) {
@@ -37,15 +50,10 @@ L.Control.Velocity = L.Control.extend({
 	    var gridValue = this.options.leafletVelocity._windy.interpolatePoint(pos.lng, pos.lat);
 	    var htmlOut = "";
 
-	    if(gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]){
-
-		    // vMs comes out upside-down..
-		    var vMs = gridValue[1];
-		    vMs = (vMs > 0) ? vMs = vMs - (vMs * 2) : Math.abs(vMs);
-
+	    if(gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
 		    htmlOut =
-			    "<strong>"+ this.options.velocityType +" Direction: </strong>"+  self.vectorToDegrees(gridValue[0], vMs) + "°" +
-			    ", <strong>"+ this.options.velocityType +" Speed: </strong>" + self.vectorToSpeed(gridValue[0],vMs).toFixed(1) + "m/s";
+			    "<strong>"+ this.options.velocityType +" Direction: </strong>"+  self.vectorToDegrees(gridValue[0],gridValue[1],this.options.angleConvention).toFixed(3) + "°" +
+			    ", <strong>"+ this.options.velocityType +" Speed: </strong>" + self.vectorToSpeed(gridValue[0],gridValue[1]).toFixed(1) + "m/s";
 	    }
 	    else {
 		    htmlOut = this.options.displayEmptyString;
