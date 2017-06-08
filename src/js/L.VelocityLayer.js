@@ -86,15 +86,9 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
 	_initWindy: function(self) {
 
-		// windy object
-		this._windy = new Windy({
-			canvas: self._canvasLayer._canvas,
-			data: self.options.data,
-			velocityScale: self.options.velocityScale || 0.005,
-			minVelocity: self.options.minVelocity || 0,
-			maxVelocity: self.options.maxVelocity || 10,
-			colorScale: self.options.colorScale || null
-		});
+		// windy object, copy options
+		const options = Object.assign({ canvas: self._canvasLayer._canvas }, self.options)
+		this._windy = new Windy(options);
 
 		// prepare context global var, start drawing
 		this._context = this._canvasLayer._canvas.getContext('2d');

@@ -330,15 +330,9 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
 	_initWindy: function _initWindy(self) {
 
-		// windy object
-		this._windy = new Windy({
-			canvas: self._canvasLayer._canvas,
-			data: self.options.data,
-			velocityScale: self.options.velocityScale || 0.005,
-			minVelocity: self.options.minVelocity || 0,
-			maxVelocity: self.options.maxVelocity || 10,
-			colorScale: self.options.colorScale || null
-		});
+		// windy object, copy options
+		var options = Object.assign({ canvas: self._canvasLayer._canvas }, self.options);
+		this._windy = new Windy(options);
 
 		// prepare context global var, start drawing
 		this._context = this._canvasLayer._canvas.getContext('2d');
@@ -400,14 +394,14 @@ L.velocityLayer = function (options) {
 
 var Windy = function Windy(params) {
 
-	var MIN_VELOCITY_INTENSITY = params.minVelocity; // velocity at which particle intensity is minimum (m/s)
-	var MAX_VELOCITY_INTENSITY = params.maxVelocity; // velocity at which particle intensity is maximum (m/s)
-	var VELOCITY_SCALE = params.velocityScale * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
-	var MAX_PARTICLE_AGE = 90; // max number of frames a particle is drawn before regeneration
-	var PARTICLE_LINE_WIDTH = 1; // line width of a drawn particle
-	var PARTICLE_MULTIPLIER = 1 / 300; // particle count scalar (completely arbitrary--this values looks nice)
+	var MIN_VELOCITY_INTENSITY = params.minVelocity || 0; // velocity at which particle intensity is minimum (m/s)
+	var MAX_VELOCITY_INTENSITY = params.maxVelocity || 10; // velocity at which particle intensity is maximum (m/s)
+	var VELOCITY_SCALE = (params.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
+	var MAX_PARTICLE_AGE = params.particleAge || 90; // max number of frames a particle is drawn before regeneration
+	var PARTICLE_LINE_WIDTH = params.lineWidth || 1; // line width of a drawn particle
+	var PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300; // particle count scalar (completely arbitrary--this values looks nice)
 	var PARTICLE_REDUCTION = Math.pow(window.devicePixelRatio, 1 / 3) || 1.6; // multiply particle count for mobiles by this amount
-	var FRAME_RATE = 15,
+	var FRAME_RATE = params.frameRate || 15,
 	    FRAME_TIME = 1000 / FRAME_RATE; // desired frames per second
 
 	var defaulColorScale = ["rgb(36,104, 180)", "rgb(60,157, 194)", "rgb(128,205,193 )", "rgb(151,218,168 )", "rgb(198,231,181)", "rgb(238,247,217)", "rgb(255,238,159)", "rgb(252,217,125)", "rgb(255,182,100)", "rgb(252,150,75)", "rgb(250,112,52)", "rgb(245,64,32)", "rgb(237,45,28)", "rgb(220,24,32)", "rgb(180,0,35)"];
