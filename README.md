@@ -17,7 +17,8 @@ var velocityLayer = L.velocityLayer({
 	displayOptions: {
 		velocityType: 'Global Wind',
 		displayPosition: 'bottomleft',
-		displayEmptyString: 'No velocity data'
+		displayEmptyString: 'No velocity data',
+		speedUnit: 'kt'
 	},
 	data: data,             // see demo/*.json, or wind-js-server for example data service
 	
@@ -28,6 +29,9 @@ var velocityLayer = L.velocityLayer({
 	colorScale: []          // define your own array of hex/rgb colors
 });
 ```
+
+The speed unit option refers to the unit used to express the wind speed in the control.
+It can be `m/s` for meter per second, `k/h` for kilometer per hour or `kt` for knots. If not given defaults to `m/s`.
 
 ## Reference
 `leaflet-velocity` is possible because of things like:

@@ -1,8 +1,18 @@
+function meterSec2Knots (meters) {
+  return meters / 0.514
+}
+
+function meterSec2kilometerHour (meters) {
+  return meters * 3.6
+}
+
 L.Control.Velocity = L.Control.extend({
 
     options: {
         position: 'bottomleft',
-        emptyString: 'Unavailable'
+        emptyString: 'Unavailable',
+        // Could be 'm/s' for meter per second, 'k/h' for kilometer per hour or 'kt' for knots
+        speedUnit: 'm/s'
     },
 
     onAdd: function (map) {
@@ -17,9 +27,16 @@ L.Control.Velocity = L.Control.extend({
         map.off('mousemove', this._onMouseMove, this)
     },
 
-    vectorToSpeed: function(uMs, vMs){
+    vectorToSpeed: function(uMs, vMs, unit){
         var velocityAbs = Math.sqrt( Math.pow(uMs, 2) + Math.pow(vMs, 2) );
-        return velocityAbs;
+        // Default is m/s
+        if (unit === 'k/h') {
+            return meterSec2kilometerHour(velocityAbs);
+        } else if (unit === 'kt') {
+            return meterSec2Knots(velocityAbs);
+        } else {
+            return velocityAbs;
+        }
     },
 
     vectorToDegrees: function(uMs, vMs){
@@ -27,7 +44,7 @@ L.Control.Velocity = L.Control.extend({
         var velocityDirTrigTo = Math.atan2(uMs/velocityAbs, vMs/velocityAbs);
         var velocityDirTrigToDegrees = velocityDirTrigTo * 180/Math.PI;
         var velocityDirTrigFromDegrees = velocityDirTrigToDegrees + 180;
-        return velocityDirTrigFromDegrees.toFixed(3);
+        return velocityDirTrigFromDegrees.toFixed(2);
     },
 
     _onMouseMove: function (e) {
@@ -45,7 +62,7 @@ L.Control.Velocity = L.Control.extend({
 
 		    htmlOut =
 			    "<strong>"+ this.options.velocityType +" Direction: </strong>"+  self.vectorToDegrees(gridValue[0], vMs) + "°" +
-			    ", <strong>"+ this.options.velocityType +" Speed: </strong>" + self.vectorToSpeed(gridValue[0],vMs).toFixed(1) + "m/s";
+			    ", <strong>"+ this.options.velocityType +" Speed: </strong>" + self.vectorToSpeed(gridValue[0],vMs,this.options.speedUnit).toFixed(2) + this.options.speedUnit;
 	    }
 	    else {
 		    htmlOut = this.options.displayEmptyString;
