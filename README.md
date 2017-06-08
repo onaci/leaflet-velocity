@@ -1,3 +1,5 @@
+This fork is used to publish a custom package for Weacast while waiting for pull requests to be integrated to the upstream.
+
 # leaflet-velocity [![NPM version][npm-image]][npm-url]
 A plugin for Leaflet (v1.0.3, and v0.7.7) to create a canvas visualisation layer for direction and intensity of arbitrary velocities (e.g. wind, ocean current).
 
