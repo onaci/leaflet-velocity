@@ -1,3 +1,5 @@
+This fork is used to publish a custom package for Weacast while waiting for pull requests to be integrated to the upstream.
+
 # leaflet-velocity [![NPM version][npm-image]][npm-url]
 A plugin for Leaflet (v1.0.3, and v0.7.7) to create a canvas visualisation layer for direction and intensity of arbitrary velocities (e.g. wind, ocean current).
 
@@ -16,8 +18,10 @@ var velocityLayer = L.velocityLayer({
 	displayValues: true,
 	displayOptions: {
 		velocityType: 'Global Wind',
-		displayPosition: 'bottomleft',
-		displayEmptyString: 'No velocity data'
+		position: 'bottomleft',
+		emptyString: 'No velocity data',
+		angleConvention: 'bearingCW',
+		speedUnit: 'kt'
 	},
 	data: data,             // see demo/*.json, or wind-js-server for example data service
 	
@@ -28,6 +32,12 @@ var velocityLayer = L.velocityLayer({
 	colorScale: []          // define your own array of hex/rgb colors
 });
 ```
+The angle convention option refers to the convention used to express the wind direction as an angle from north direction in the control.
+It can be any combination of `bearing` (angle toward which the flow goes) or `meteo` (angle from which the flow comes),
+and `CW` (angle value increases clock-wise) or `CCW` (angle value increases counter clock-wise). If not given defaults to `bearingCCW`.
+
+The speed unit option refers to the unit used to express the wind speed in the control.
+It can be `m/s` for meter per second, `k/h` for kilometer per hour or `kt` for knots. If not given defaults to `m/s`.
 
 ## Reference
 `leaflet-velocity` is possible because of things like:

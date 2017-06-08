@@ -1,5 +1,5 @@
 {
-  "name": "leaflet-velocity",
+  "name": "weacast-leaflet-velocity",
   "version": "1.1.0",
   "description": "A custom layer for leaflet to visualise arbitrary velocities",
   "main": "dist/leaflet-velocity.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danwild/leaflet-velocity.git"
+    "url": "git+https://github.com/weacast/leaflet-velocity.git"
   },
   "keywords": [
     "leaflet",
@@ -24,9 +24,9 @@
   "author": "danwild@y7mail.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/danwild/leaflet-velocity/issues"
+    "url": "https://github.com/weacast/leaflet-velocity/issues"
   },
-  "homepage": "https://github.com/danwild/leaflet-velocity#readme",
+  "homepage": "https://github.com/weacast/leaflet-velocity#readme",
   "dependencies": {},
   "devDependencies": {
     "babel-preset-es2015": "^6.9.0",

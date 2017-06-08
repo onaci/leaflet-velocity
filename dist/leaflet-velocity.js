@@ -152,11 +152,24 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 L.canvasLayer = function () {
 	return new L.CanvasLayer();
 };
+function meterSec2Knots(meters) {
+	return meters / 0.514;
+}
+
+function meterSec2kilometerHour(meters) {
+	return meters * 3.6;
+}
+
 L.Control.Velocity = L.Control.extend({
 
 	options: {
 		position: 'bottomleft',
-		emptyString: 'Unavailable'
+		emptyString: 'Unavailable',
+		// Could be 'm/s' for meter per second, 'k/h' for kilometer per hour or 'kt' for knots
+		speedUnit: 'm/s',
+		// Could be any combination of 'bearing' (angle toward which the flow goes) or 'meteo' (angle from which the flow comes)
+		// and 'CW' (angle value increases clock-wise) or 'CCW' (angle value increases counter clock-wise)
+		angleConvention: 'bearingCCW'
 	},
 
 	onAdd: function onAdd(map) {
@@ -171,17 +184,34 @@ L.Control.Velocity = L.Control.extend({
 		map.off('mousemove', this._onMouseMove, this);
 	},
 
-	vectorToSpeed: function vectorToSpeed(uMs, vMs) {
+	vectorToSpeed: function vectorToSpeed(uMs, vMs, unit) {
 		var velocityAbs = Math.sqrt(Math.pow(uMs, 2) + Math.pow(vMs, 2));
-		return velocityAbs;
+		// Default is m/s
+		if (unit === 'k/h') {
+			return meterSec2kilometerHour(velocityAbs);
+		} else if (unit === 'kt') {
+			return meterSec2Knots(velocityAbs);
+		} else {
+			return velocityAbs;
+		}
 	},
 
-	vectorToDegrees: function vectorToDegrees(uMs, vMs) {
+	vectorToDegrees: function vectorToDegrees(uMs, vMs, angleConvention) {
+		// Default angle convention is CW
+		if (angleConvention.endsWith('CCW')) {
+			// vMs comes out upside-down..
+			vMs = vMs > 0 ? vMs = -vMs : Math.abs(vMs);
+		}
 		var velocityAbs = Math.sqrt(Math.pow(uMs, 2) + Math.pow(vMs, 2));
-		var velocityDirTrigTo = Math.atan2(uMs / velocityAbs, vMs / velocityAbs);
-		var velocityDirTrigToDegrees = velocityDirTrigTo * 180 / Math.PI;
-		var velocityDirTrigFromDegrees = velocityDirTrigToDegrees + 180;
-		return velocityDirTrigFromDegrees.toFixed(3);
+		var velocityDir = Math.atan2(uMs / velocityAbs, vMs / velocityAbs);
+		var velocityDirToDegrees = velocityDir * 180 / Math.PI + 180;
+
+		if (angleConvention === 'bearingCW' || angleConvention === 'meteoCCW') {
+			velocityDirToDegrees += 180;
+			if (velocityDirToDegrees >= 360) velocityDirToDegrees -= 360;
+		}
+
+		return velocityDirToDegrees;
 	},
 
 	_onMouseMove: function _onMouseMove(e) {
@@ -192,14 +222,9 @@ L.Control.Velocity = L.Control.extend({
 		var htmlOut = "";
 
 		if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-
-			// vMs comes out upside-down..
-			var vMs = gridValue[1];
-			vMs = vMs > 0 ? vMs = vMs - vMs * 2 : Math.abs(vMs);
-
-			htmlOut = "<strong>" + this.options.velocityType + " Direction: </strong>" + self.vectorToDegrees(gridValue[0], vMs) + "°" + ", <strong>" + this.options.velocityType + " Speed: </strong>" + self.vectorToSpeed(gridValue[0], vMs).toFixed(1) + "m/s";
+			htmlOut = "<strong>" + this.options.velocityType + " Direction: </strong>" + self.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention).toFixed(2) + "°" + ", <strong>" + this.options.velocityType + " Speed: </strong>" + self.vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit).toFixed(2) + this.options.speedUnit;
 		} else {
-			htmlOut = this.options.displayEmptyString;
+			htmlOut = this.options.emptyString;
 		}
 
 		self._container.innerHTML = htmlOut;
@@ -233,8 +258,8 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 		displayValues: true,
 		displayOptions: {
 			velocityType: 'Velocity',
-			displayPosition: 'bottomleft',
-			displayEmptyString: 'No velocity data'
+			position: 'bottomleft',
+			emptyString: 'No velocity data'
 		},
 		maxVelocity: 10, // used to align color scale
 		colorScale: null,
@@ -305,15 +330,9 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
 	_initWindy: function _initWindy(self) {
 
-		// windy object
-		this._windy = new Windy({
-			canvas: self._canvasLayer._canvas,
-			data: self.options.data,
-			velocityScale: self.options.velocityScale || 0.005,
-			minVelocity: self.options.minVelocity || 0,
-			maxVelocity: self.options.maxVelocity || 10,
-			colorScale: self.options.colorScale || null
-		});
+		// windy object, copy options
+		var options = Object.assign({ canvas: self._canvasLayer._canvas }, self.options);
+		this._windy = new Windy(options);
 
 		// prepare context global var, start drawing
 		this._context = this._canvasLayer._canvas.getContext('2d');
@@ -375,14 +394,14 @@ L.velocityLayer = function (options) {
 
 var Windy = function Windy(params) {
 
-	var MIN_VELOCITY_INTENSITY = params.minVelocity; // velocity at which particle intensity is minimum (m/s)
-	var MAX_VELOCITY_INTENSITY = params.maxVelocity; // velocity at which particle intensity is maximum (m/s)
-	var VELOCITY_SCALE = params.velocityScale * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
-	var MAX_PARTICLE_AGE = 90; // max number of frames a particle is drawn before regeneration
-	var PARTICLE_LINE_WIDTH = 1; // line width of a drawn particle
-	var PARTICLE_MULTIPLIER = 1 / 300; // particle count scalar (completely arbitrary--this values looks nice)
+	var MIN_VELOCITY_INTENSITY = params.minVelocity || 0; // velocity at which particle intensity is minimum (m/s)
+	var MAX_VELOCITY_INTENSITY = params.maxVelocity || 10; // velocity at which particle intensity is maximum (m/s)
+	var VELOCITY_SCALE = (params.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
+	var MAX_PARTICLE_AGE = params.particleAge || 90; // max number of frames a particle is drawn before regeneration
+	var PARTICLE_LINE_WIDTH = params.lineWidth || 1; // line width of a drawn particle
+	var PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300; // particle count scalar (completely arbitrary--this values looks nice)
 	var PARTICLE_REDUCTION = Math.pow(window.devicePixelRatio, 1 / 3) || 1.6; // multiply particle count for mobiles by this amount
-	var FRAME_RATE = 15,
+	var FRAME_RATE = params.frameRate || 15,
 	    FRAME_TIME = 1000 / FRAME_RATE; // desired frames per second
 
 	var defaulColorScale = ["rgb(36,104, 180)", "rgb(60,157, 194)", "rgb(128,205,193 )", "rgb(151,218,168 )", "rgb(198,231,181)", "rgb(238,247,217)", "rgb(255,238,159)", "rgb(252,217,125)", "rgb(255,182,100)", "rgb(252,150,75)", "rgb(250,112,52)", "rgb(245,64,32)", "rgb(237,45,28)", "rgb(220,24,32)", "rgb(180,0,35)"];
