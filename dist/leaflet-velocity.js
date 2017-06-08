@@ -152,11 +152,21 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 L.canvasLayer = function () {
 	return new L.CanvasLayer();
 };
+function meterSec2Knots(meters) {
+	return meters / 0.514;
+}
+
+function meterSec2kilometerHour(meters) {
+	return meters * 3.6;
+}
+
 L.Control.Velocity = L.Control.extend({
 
 	options: {
 		position: 'bottomleft',
 		emptyString: 'Unavailable',
+		// Could be 'm/s' for meter per second, 'k/h' for kilometer per hour or 'kt' for knots
+		speedUnit: 'm/s',
 		// Could be any combination of 'bearing' (angle toward which the flow goes) or 'meteo' (angle from which the flow comes)
 		// and 'CW' (angle value increases clock-wise) or 'CCW' (angle value increases counter clock-wise)
 		angleConvention: 'bearingCCW'
@@ -174,9 +184,16 @@ L.Control.Velocity = L.Control.extend({
 		map.off('mousemove', this._onMouseMove, this);
 	},
 
-	vectorToSpeed: function vectorToSpeed(uMs, vMs) {
+	vectorToSpeed: function vectorToSpeed(uMs, vMs, unit) {
 		var velocityAbs = Math.sqrt(Math.pow(uMs, 2) + Math.pow(vMs, 2));
-		return velocityAbs;
+		// Default is m/s
+		if (unit === 'k/h') {
+			return meterSec2kilometerHour(velocityAbs);
+		} else if (unit === 'kt') {
+			return meterSec2Knots(velocityAbs);
+		} else {
+			return velocityAbs;
+		}
 	},
 
 	vectorToDegrees: function vectorToDegrees(uMs, vMs, angleConvention) {
@@ -205,7 +222,7 @@ L.Control.Velocity = L.Control.extend({
 		var htmlOut = "";
 
 		if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-			htmlOut = "<strong>" + this.options.velocityType + " Direction: </strong>" + self.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention).toFixed(3) + "°" + ", <strong>" + this.options.velocityType + " Speed: </strong>" + self.vectorToSpeed(gridValue[0], gridValue[1]).toFixed(1) + "m/s";
+			htmlOut = "<strong>" + this.options.velocityType + " Direction: </strong>" + self.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention).toFixed(2) + "°" + ", <strong>" + this.options.velocityType + " Speed: </strong>" + self.vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit).toFixed(2) + this.options.speedUnit;
 		} else {
 			htmlOut = this.options.emptyString;
 		}
