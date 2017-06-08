@@ -12,14 +12,14 @@
 
 var Windy = function( params ){
 
-	const MIN_VELOCITY_INTENSITY = params.minVelocity;                             // velocity at which particle intensity is minimum (m/s)
-	const MAX_VELOCITY_INTENSITY = params.maxVelocity;                             // velocity at which particle intensity is maximum (m/s)
-	const VELOCITY_SCALE = params.velocityScale * (Math.pow(window.devicePixelRatio,1/3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
-	const MAX_PARTICLE_AGE = 90;                                                 // max number of frames a particle is drawn before regeneration
-	const PARTICLE_LINE_WIDTH = 1;                                               // line width of a drawn particle
-	const PARTICLE_MULTIPLIER = 1 / 300;                                         // particle count scalar (completely arbitrary--this values looks nice)
+	const MIN_VELOCITY_INTENSITY = params.minVelocity || 0;                             // velocity at which particle intensity is minimum (m/s)
+	const MAX_VELOCITY_INTENSITY = params.maxVelocity || 10;                             // velocity at which particle intensity is maximum (m/s)
+	const VELOCITY_SCALE = (params.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio,1/3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
+	const MAX_PARTICLE_AGE = params.particleAge || 90;                         	 // max number of frames a particle is drawn before regeneration
+	const PARTICLE_LINE_WIDTH = params.lineWidth || 1;                           // line width of a drawn particle
+	const PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300;            // particle count scalar (completely arbitrary--this values looks nice)
 	const PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio,1/3) || 1.6);   // multiply particle count for mobiles by this amount
-	const FRAME_RATE = 15, FRAME_TIME = 1000 / FRAME_RATE;                       // desired frames per second
+	const FRAME_RATE = params.frameRate || 15, FRAME_TIME = 1000 / FRAME_RATE;   // desired frames per second
 
 	var defaulColorScale = [
 		"rgb(36,104, 180)",
