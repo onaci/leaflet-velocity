@@ -16,8 +16,9 @@ var velocityLayer = L.velocityLayer({
 	displayValues: true,
 	displayOptions: {
 		velocityType: 'Global Wind',
-		displayPosition: 'bottomleft',
-		displayEmptyString: 'No velocity data'
+		position: 'bottomleft',
+		emptyString: 'No velocity data',
+		angleConvention: 'bearingCW'
 	},
 	data: data,             // see demo/*.json, or wind-js-server for example data service
 	
@@ -28,6 +29,9 @@ var velocityLayer = L.velocityLayer({
 	colorScale: []          // define your own array of hex/rgb colors
 });
 ```
+The angle convention option refers to the convention used to express the wind direction as an angle from north direction in the control.
+It can be any combination of `bearing` (angle toward which the flow goes) or `meteo` (angle from which the flow comes),
+and `CW` (angle value increases clock-wise) or `CCW` (angle value increases counter clock-wise). If not given defaults to `bearingCCW`.
 
 ## Reference
 `leaflet-velocity` is possible because of things like:

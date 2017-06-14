@@ -4,8 +4,8 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 		displayValues: true,
 		displayOptions: {
 			velocityType: 'Velocity',
-			displayPosition: 'bottomleft',
-			displayEmptyString: 'No velocity data'
+			position: 'bottomleft',
+			emptyString: 'No velocity data'
 		},
 		maxVelocity: 10, // used to align color scale
 		colorScale: null,
