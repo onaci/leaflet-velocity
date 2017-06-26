@@ -79,12 +79,12 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 
 
 		map._panes.overlayPane.appendChild(this._canvas);
-
 		map.on(this.getEvents(),this);
 
 		var del = this._delegate || this;
 		del.onLayerDidMount && del.onLayerDidMount(); // -- callback
 		this.needRedraw();
+		this._onLayerDidMove();
 	},
 
 	//-------------------------------------------------------------
