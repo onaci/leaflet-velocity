@@ -50,4 +50,4 @@ MIT License (MIT)
 
 [npm-image]: https://badge.fury.io/js/leaflet-velocity.svg
 [npm-url]: https://www.npmjs.com/package/leaflet-velocity
-[npm-downloads-image]: https://img.shields.io/npm/dt/leaflet-draw.svg
+[npm-downloads-image]: https://img.shields.io/npm/dt/leaflet-velocity.svg
