@@ -1,4 +1,4 @@
-# leaflet-velocity [![NPM version][npm-image]][npm-url]
+# leaflet-velocity [![NPM version][npm-image]][npm-url] [![NPM Downloads][npm-downloads-image]][npm-url]
 A plugin for Leaflet (v1.0.3, and v0.7.7) to create a canvas visualisation layer for direction and intensity of arbitrary velocities (e.g. wind, ocean current).
 
 Live Demo: https://danwild.github.io/leaflet-velocity/
@@ -50,3 +50,4 @@ MIT License (MIT)
 
 [npm-image]: https://badge.fury.io/js/leaflet-velocity.svg
 [npm-url]: https://www.npmjs.com/package/leaflet-velocity
+[npm-downloads-image]: https://img.shields.io/npm/dt/leaflet-draw.svg
