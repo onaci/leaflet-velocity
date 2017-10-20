@@ -26,9 +26,9 @@ var velocityLayer = L.velocityLayer({
 	data: data,             // see demo/*.json, or wind-js-server for example data service
 	
 	// OPTIONAL
-	minVelocity: 0          // used to align color scale
-	maxVelocity: 10         // used to align color scale
-	velocityScale: 0.005    // modifier for particle animations, arbitrarily defaults to 0.005
+	minVelocity: 0,          // used to align color scale
+	maxVelocity: 10,         // used to align color scale
+	velocityScale: 0.005,    // modifier for particle animations, arbitrarily defaults to 0.005
 	colorScale: []          // define your own array of hex/rgb colors
 });
 ```
@@ -44,6 +44,9 @@ It can be `m/s` for meter per second, `k/h` for kilometer per hour or `kt` for k
 - [L.CanvasOverlay.js](https://gist.github.com/Sumbera/11114288)
 - [WindJS](https://github.com/Esri/wind-js)
 - [earth](https://github.com/cambecc/earth)
+
+## Example data
+Data shown for the Great Barrier Reef has been derived from [CSIRO's eReefs products](https://research.csiro.au/ereefs/)
 
 ## License
 MIT License (MIT)
