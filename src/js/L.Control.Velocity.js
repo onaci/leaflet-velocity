@@ -14,7 +14,7 @@ L.Control.Velocity = L.Control.extend({
         this._container = L.DomUtil.create('div', 'leaflet-control-velocity');
         L.DomEvent.disableClickPropagation(this._container);
         map.on('mousemove', this._onMouseMove, this);
-        this._container.innerHTML=this.options.emptyString;
+        this._container.innerHTML = this.options.emptyString;
         return this._container;
     },
 
@@ -70,10 +70,10 @@ L.Control.Velocity = L.Control.extend({
 	    var htmlOut = "";
 
 	    if(gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-		    htmlOut = "<strong>" + this.options.velocityType + " Direction: </strong>" +
-			    self.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention).toFixed(3) +
-			    "°" + ", <strong>" + this.options.velocityType + " Speed: </strong>" +
-			    self.vectorToSpeed(gridValue[0], gridValue[1]).toFixed(1) + "m/s";
+		    htmlOut = "<strong>"+ this.options.velocityType +" Direction: </strong>"+
+			    self.vectorToDegrees(gridValue[0],gridValue[1],this.options.angleConvention).toFixed(2) +"°"+
+			    ", <strong>"+ this.options.velocityType +" Speed: </strong>"+
+			    self.vectorToSpeed(gridValue[0],gridValue[1],this.options.speedUnit).toFixed(2) + this.options.speedUnit;
 	    }
 	    else {
 		    htmlOut = this.options.emptyString;

@@ -1,6 +1,6 @@
 {
   "name": "leaflet-velocity",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "A custom layer for leaflet to visualise arbitrary velocities",
   "main": "dist/leaflet-velocity.js",
   "scripts": {
