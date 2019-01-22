@@ -7,7 +7,9 @@ L.Control.Velocity = L.Control.extend({
         // and 'CW' (angle value increases clock-wise) or 'CCW' (angle value increases counter clock-wise)
         angleConvention: 'bearingCCW',
 	    // Could be 'm/s' for meter per second, 'k/h' for kilometer per hour or 'kt' for knots
-	    speedUnit: 'm/s'
+	    speedUnit: 'm/s',
+        onAdd: null,
+        onRemove: null
     },
 
     onAdd: function (map) {
@@ -15,11 +17,13 @@ L.Control.Velocity = L.Control.extend({
         L.DomEvent.disableClickPropagation(this._container);
         map.on('mousemove', this._onMouseMove, this);
         this._container.innerHTML = this.options.emptyString;
+        if (this.options.leafletVelocity.options.onAdd) this.options.leafletVelocity.options.onAdd();
         return this._container;
     },
 
     onRemove: function (map) {
-        map.off('mousemove', this._onMouseMove, this)
+        map.off('mousemove', this._onMouseMove, this);
+	    if (this.options.leafletVelocity.options.onRemove) this.options.leafletVelocity.options.onRemove();
     },
 
     vectorToSpeed: function(uMs, vMs, unit){
@@ -80,12 +84,6 @@ L.Control.Velocity = L.Control.extend({
 	    }
 
 	    self._container.innerHTML = htmlOut;
-
-        // move control to bottom row
-        if($('.leaflet-control-velocity').index() == 0){
-            $('.leaflet-control-velocity').insertAfter('.leaflet-control-mouseposition');
-        }
-
     }
 
 });

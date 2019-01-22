@@ -23,13 +23,15 @@ var velocityLayer = L.velocityLayer({
 		displayEmptyString: 'No velocity data',
 		speedUnit: 'kt'
 	},
-	data: data,             // see demo/*.json, or wind-js-server for example data service
+	data: data,           // see demo/*.json, or wind-js-server for example data service
 	
 	// OPTIONAL
-	minVelocity: 0,          // used to align color scale
-	maxVelocity: 10,         // used to align color scale
-	velocityScale: 0.005,    // modifier for particle animations, arbitrarily defaults to 0.005
-	colorScale: []          // define your own array of hex/rgb colors
+	minVelocity: 0,       // used to align color scale
+	maxVelocity: 10,      // used to align color scale
+	velocityScale: 0.005, // modifier for particle animations, arbitrarily defaults to 0.005
+	colorScale: [],       // define your own array of hex/rgb colors
+	onAdd: null,          // callback function
+	onRemove: null,       // callback function
 });
 ```
 The angle convention option refers to the convention used to express the wind direction as an angle from north direction in the control.
@@ -38,6 +40,11 @@ and `CW` (angle value increases clock-wise) or `CCW` (angle value increases coun
 
 The speed unit option refers to the unit used to express the wind speed in the control.
 It can be `m/s` for meter per second, `k/h` for kilometer per hour or `kt` for knots. If not given defaults to `m/s`.
+
+## Build / watch
+```shell
+gulp
+```
 
 ## Reference
 `leaflet-velocity` is possible because of things like:
