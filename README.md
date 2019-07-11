@@ -34,9 +34,7 @@ var velocityLayer = L.velocityLayer({
 	onRemove: null,       // callback function
 
 	// optional pane to add the layer, will be created if doesn't exist
-	// Note: 
-	// - that the <HTMLElement> must be tagged with a unique id
-	// - leaflet v1+ only (falls back to overlayPane for < v1)
+	// leaflet v1+ only (falls back to overlayPane for < v1)
 	paneName: 'overlayPane'
 });
 ```
