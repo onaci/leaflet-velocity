@@ -13,7 +13,7 @@ gulp.task("scripts", function () {
     .pipe(concat("leaflet-velocity.js"))
     .pipe(
       babel({
-        presets: ["es2015"]
+        presets: ["@babel/preset-env"]
       })
     )
     .pipe(gulp.dest("dist"))
