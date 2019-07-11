@@ -57,7 +57,7 @@ It can be `m/s` for meter per second, `k/h` for kilometer per hour or `kt` for k
 
 ## Build / watch
 ```shell
-gulp
+npm run watch
 ```
 
 ## Reference

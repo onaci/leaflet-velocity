@@ -4,10 +4,10 @@ const concat = require("gulp-concat");
 const concatCss = require("gulp-concat-css");
 const rename = require("gulp-rename");
 const uglify = require("gulp-uglify");
-const cssNano = require("gulp-cssnano");
+const postCss = require("gulp-postcss");
 
 // Concatenate & Minify src and dependencies
-gulp.task("scripts", function() {
+gulp.task("scripts", function () {
   return gulp
     .src(["src/js/**.js"])
     .pipe(concat("leaflet-velocity.js"))
@@ -22,27 +22,27 @@ gulp.task("scripts", function() {
     .pipe(gulp.dest("dist"));
 });
 
-gulp.task("concatCss", function() {
+gulp.task("concatCss", function () {
   return gulp
     .src("./src/css/*.css")
     .pipe(concatCss("leaflet-velocity.css"))
     .pipe(gulp.dest("./dist"));
 });
 
-gulp.task("cssNano", ["concatCss"], function() {
-  gulp
+gulp.task("postCss", function () {
+  return gulp
     .src("./dist/leaflet-velocity.css")
-    .pipe(cssNano())
+    .pipe(postCss())
     .pipe(rename({ suffix: ".min" }))
     .pipe(gulp.dest("./dist"));
 });
 
-// Default Task
-gulp.task("default", ["scripts", "concatCss", "cssNano", "watch"]);
-
 // Watch Files For Changes
-gulp.task("watch", function() {
+gulp.task("watch", function () {
   // We watch both JS and HTML files.
-  gulp.watch("src/js/*.js", ["scripts"]);
-  gulp.watch("src/css/*.css", ["concatCss", "cssNano"]);
+  gulp.watch("src/js/*.js", gulp.series("scripts"));
+  gulp.watch("src/css/*.css", gulp.series("concatCss", "postCss"));
 });
+
+// Default Task
+gulp.task('default', gulp.series("scripts", "concatCss", "postCss", "watch"));
