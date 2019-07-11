@@ -8,7 +8,7 @@
 // -- L.DomUtil.setTransform from leaflet 1.0.0 to work on 0.0.7
 //------------------------------------------------------------------------------
 if (!L.DomUtil.setTransform) {
-  L.DomUtil.setTransform = function(el, offset, scale) {
+  L.DomUtil.setTransform = function (el, offset, scale) {
     var pos = offset || new L.Point(0, 0);
 
     el.style[L.DomUtil.TRANSFORM] =
@@ -22,7 +22,7 @@ if (!L.DomUtil.setTransform) {
 // -- support for both  0.0.7 and 1.0.0 rc2 leaflet
 L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   // -- initialized is called on prototype
-  initialize: function(options) {
+  initialize: function (options) {
     this._map = null;
     this._canvas = null;
     this._frame = null;
@@ -30,12 +30,12 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
     L.setOptions(this, options);
   },
 
-  delegate: function(del) {
+  delegate: function (del) {
     this._delegate = del;
     return this;
   },
 
-  needRedraw: function() {
+  needRedraw: function () {
     if (!this._frame) {
       this._frame = L.Util.requestAnimFrame(this.drawLayer, this);
     }
@@ -43,18 +43,18 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   },
 
   //-------------------------------------------------------------
-  _onLayerDidResize: function(resizeEvent) {
+  _onLayerDidResize: function (resizeEvent) {
     this._canvas.width = resizeEvent.newSize.x;
     this._canvas.height = resizeEvent.newSize.y;
   },
   //-------------------------------------------------------------
-  _onLayerDidMove: function() {
+  _onLayerDidMove: function () {
     var topLeft = this._map.containerPointToLayerPoint([0, 0]);
     L.DomUtil.setPosition(this._canvas, topLeft);
     this.drawLayer();
   },
   //-------------------------------------------------------------
-  getEvents: function() {
+  getEvents: function () {
     var events = {
       resize: this._onLayerDidResize,
       moveend: this._onLayerDidMove
@@ -66,7 +66,8 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
     return events;
   },
   //-------------------------------------------------------------
-  onAdd: function(map) {
+  onAdd: function (map) {
+    console.log('canvas onAdd', this);
     this._map = map;
     this._canvas = L.DomUtil.create("canvas", "leaflet-layer");
     this.tiles = {};
@@ -81,7 +82,7 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
       "leaflet-zoom-" + (animated ? "animated" : "hide")
     );
 
-    map._panes.overlayPane.appendChild(this._canvas);
+    this.options.pane.appendChild(this._canvas);
     map.on(this.getEvents(), this);
 
     var del = this._delegate || this;
@@ -89,13 +90,13 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
     this.needRedraw();
 
     var self = this;
-    setTimeout(function() {
+    setTimeout(function () {
       self._onLayerDidMove();
     }, 0);
   },
 
   //-------------------------------------------------------------
-  onRemove: function(map) {
+  onRemove: function (map) {
     var del = this._delegate || this;
     del.onLayerWillUnmount && del.onLayerWillUnmount(); // -- callback
 
@@ -107,12 +108,12 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   },
 
   //------------------------------------------------------------
-  addTo: function(map) {
+  addTo: function (map) {
     map.addLayer(this);
     return this;
   },
   // --------------------------------------------------------------------------------
-  LatLonToMercator: function(latlon) {
+  LatLonToMercator: function (latlon) {
     return {
       x: (latlon.lng * 6378137 * Math.PI) / 180,
       y: Math.log(Math.tan(((90 + latlon.lat) * Math.PI) / 360)) * 6378137
@@ -120,7 +121,7 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   },
 
   //------------------------------------------------------------------------------
-  drawLayer: function() {
+  drawLayer: function () {
     // -- todo make the viewInfo properties  flat objects.
     var size = this._map.getSize();
     var bounds = this._map.getBounds();
@@ -146,7 +147,7 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   },
   // -- L.DomUtil.setTransform from leaflet 1.0.0 to work on 0.0.7
   //------------------------------------------------------------------------------
-  _setTransform: function(el, offset, scale) {
+  _setTransform: function (el, offset, scale) {
     var pos = offset || new L.Point(0, 0);
 
     el.style[L.DomUtil.TRANSFORM] =
@@ -157,24 +158,24 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   },
 
   //------------------------------------------------------------------------------
-  _animateZoom: function(e) {
+  _animateZoom: function (e) {
     var scale = this._map.getZoomScale(e.zoom);
     // -- different calc of offset in leaflet 1.0.0 and 0.0.7 thanks for 1.0.0-rc2 calc @jduggan1
     var offset = L.Layer
       ? this._map._latLngToNewLayerPoint(
-          this._map.getBounds().getNorthWest(),
-          e.zoom,
-          e.center
-        )
+        this._map.getBounds().getNorthWest(),
+        e.zoom,
+        e.center
+      )
       : this._map
-          ._getCenterOffset(e.center)
-          ._multiplyBy(-scale)
-          .subtract(this._map._getMapPanePos());
+        ._getCenterOffset(e.center)
+        ._multiplyBy(-scale)
+        .subtract(this._map._getMapPanePos());
 
     L.DomUtil.setTransform(this._canvas, offset, scale);
   }
 });
 
-L.canvasLayer = function() {
-  return new L.CanvasLayer();
+L.canvasLayer = function (pane) {
+  return new L.CanvasLayer(pane);
 };

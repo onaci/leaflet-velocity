@@ -11,17 +11,17 @@
  */
 
 var Windy = function(params) {
-  const MIN_VELOCITY_INTENSITY = params.minVelocity || 0; // velocity at which particle intensity is minimum (m/s)
-  const MAX_VELOCITY_INTENSITY = params.maxVelocity || 10; // velocity at which particle intensity is maximum (m/s)
-  const VELOCITY_SCALE =
+  var MIN_VELOCITY_INTENSITY = params.minVelocity || 0; // velocity at which particle intensity is minimum (m/s)
+  var MAX_VELOCITY_INTENSITY = params.maxVelocity || 10; // velocity at which particle intensity is maximum (m/s)
+  var VELOCITY_SCALE =
     (params.velocityScale || 0.005) *
     (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
-  const MAX_PARTICLE_AGE = params.particleAge || 90; // max number of frames a particle is drawn before regeneration
-  const PARTICLE_LINE_WIDTH = params.lineWidth || 1; // line width of a drawn particle
-  const PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300; // particle count scalar (completely arbitrary--this values looks nice)
-  const PARTICLE_REDUCTION = Math.pow(window.devicePixelRatio, 1 / 3) || 1.6; // multiply particle count for mobiles by this amount
-  const FRAME_RATE = params.frameRate || 15,
-    FRAME_TIME = 1000 / FRAME_RATE; // desired frames per second
+  var MAX_PARTICLE_AGE = params.particleAge || 90; // max number of frames a particle is drawn before regeneration
+  var PARTICLE_LINE_WIDTH = params.lineWidth || 1; // line width of a drawn particle
+  var PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300; // particle count scalar (completely arbitrary--this values looks nice)
+  var PARTICLE_REDUCTION = Math.pow(window.devicePixelRatio, 1 / 3) || 1.6; // multiply particle count for mobiles by this amount
+  var FRAME_RATE = params.frameRate || 15;
+  var FRAME_TIME = 1000 / FRAME_RATE; // desired frames per second
 
   var defaulColorScale = [
     "rgb(36,104, 180)",
@@ -53,6 +53,31 @@ var Windy = function(params) {
 
   var setData = function(data) {
     gridData = data;
+  };
+
+  var setOptions = function(options) {
+    if (options.hasOwnProperty("minVelocity"))
+      MIN_VELOCITY_INTENSITY = options.minVelocity;
+
+    if (options.hasOwnProperty("maxVelocity"))
+      MAX_VELOCITY_INTENSITY = options.maxVelocity;
+
+    if (options.hasOwnProperty("velocityScale"))
+      VELOCITY_SCALE =
+        (options.velocityScale || 0.005) *
+        (Math.pow(window.devicePixelRatio, 1 / 3) || 1);
+
+    if (options.hasOwnProperty("particleAge"))
+      MAX_PARTICLE_AGE = options.particleAge;
+
+    if (options.hasOwnProperty("lineWidth"))
+      PARTICLE_LINE_WIDTH = options.lineWidth;
+
+    if (options.hasOwnProperty("particleMultiplier"))
+      PARTICLE_MULTIPLIER = options.particleMultiplier;
+
+    if (options.hasOwnProperty("frameRate")) FRAME_RATE = options.frameRate;
+    FRAME_TIME = 1000 / FRAME_RATE;
   };
 
   // interpolation for vectors like wind (u,v,m)
@@ -541,7 +566,8 @@ var Windy = function(params) {
     stop: stop,
     createField: createField,
     interpolatePoint: interpolate,
-    setData: setData
+    setData: setData,
+    setOptions: setOptions
   };
 
   return windy;

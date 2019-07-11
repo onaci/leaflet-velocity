@@ -32,14 +32,28 @@ var velocityLayer = L.velocityLayer({
 	colorScale: [],       // define your own array of hex/rgb colors
 	onAdd: null,          // callback function
 	onRemove: null,       // callback function
+
+	// optional pane to add the layer, will be created if doesn't exist
+	// Note: 
+	// - that the <HTMLElement> must be tagged with a unique id
+	// - leaflet v1+ only (falls back to overlayPane for < v1)
+	paneName: 'overlayPane'
 });
 ```
+
 The angle convention option refers to the convention used to express the wind direction as an angle from north direction in the control.
 It can be any combination of `bearing` (angle toward which the flow goes) or `meteo` (angle from which the flow comes),
 and `CW` (angle value increases clock-wise) or `CCW` (angle value increases counter clock-wise). If not given defaults to `bearingCCW`.
 
 The speed unit option refers to the unit used to express the wind speed in the control.
 It can be `m/s` for meter per second, `k/h` for kilometer per hour or `kt` for knots. If not given defaults to `m/s`.
+
+## Public methods
+
+|method|params|description|
+|---|---|---|
+|`setData`|`data: {Object}`|update the layer with new data|
+|`setOptions`|`options: {Object}`|update the layer with new options|
 
 ## Build / watch
 ```shell

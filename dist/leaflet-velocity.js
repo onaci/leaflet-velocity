@@ -65,6 +65,7 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   },
   //-------------------------------------------------------------
   onAdd: function onAdd(map) {
+    console.log('canvas onAdd', this);
     this._map = map;
     this._canvas = L.DomUtil.create("canvas", "leaflet-layer");
     this.tiles = {};
@@ -76,7 +77,7 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
     var animated = this._map.options.zoomAnimation && L.Browser.any3d;
     L.DomUtil.addClass(this._canvas, "leaflet-zoom-" + (animated ? "animated" : "hide"));
 
-    map._panes.overlayPane.appendChild(this._canvas);
+    this.options.pane.appendChild(this._canvas);
     map.on(this.getEvents(), this);
 
     var del = this._delegate || this;
@@ -154,8 +155,8 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   }
 });
 
-L.canvasLayer = function () {
-  return new L.CanvasLayer();
+L.canvasLayer = function (pane) {
+  return new L.CanvasLayer(pane);
 };
 
 L.Control.Velocity = L.Control.extend({
@@ -280,9 +281,18 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
   },
 
   onAdd: function onAdd(map) {
-    // create canvas, add overlay control
-    this._canvasLayer = L.canvasLayer().delegate(this);
+
+    // determine where to add the layer
+    this._paneName = this.options.paneName || 'overlayPane';
+
+    // fall back to overlayPane for leaflet < 1
+    var pane = map._panes.overlayPane;
+    if (map.createPane) pane = map.createPane(this._paneName);
+
+    // create canvas, add to map pane
+    this._canvasLayer = L.canvasLayer({ pane: pane }).delegate(this);
     this._canvasLayer.addTo(map);
+
     this._map = map;
   },
 
@@ -292,9 +302,23 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
   setData: function setData(data) {
     this.options.data = data;
-
     if (this._windy) {
       this._windy.setData(data);
+      this._clearAndRestart();
+    }
+    this.fire("load");
+  },
+
+  setOptions: function setOptions(options) {
+    this.options = Object.assign(this.options, options);
+    if (options.hasOwnProperty("displayOptions")) {
+      this.options.displayOptions = Object.assign(this.options.displayOptions, options.displayOptions);
+      this._initMouseHandler(true);
+    }
+    if (options.hasOwnProperty("data")) this.options.data = options.data;
+    if (this._windy) {
+      this._windy.setOptions(options);
+      if (options.hasOwnProperty("data")) this._windy.setData(options.data);
       this._clearAndRestart();
     }
 
@@ -346,10 +370,14 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     this._map.on("zoomend", self._clearAndRestart);
     this._map.on("resize", self._clearWind);
 
-    this._initMouseHandler();
+    this._initMouseHandler(false);
   },
 
-  _initMouseHandler: function _initMouseHandler() {
+  _initMouseHandler: function _initMouseHandler(voidPrevious) {
+    if (voidPrevious) {
+      this._map.removeControl(this._mouseControl);
+      this._mouseControl = false;
+    }
     if (!this._mouseControl && this.options.displayValues) {
       var options = this.options.displayOptions || {};
       options["leafletVelocity"] = this;
@@ -402,8 +430,8 @@ var Windy = function Windy(params) {
   var PARTICLE_LINE_WIDTH = params.lineWidth || 1; // line width of a drawn particle
   var PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300; // particle count scalar (completely arbitrary--this values looks nice)
   var PARTICLE_REDUCTION = Math.pow(window.devicePixelRatio, 1 / 3) || 1.6; // multiply particle count for mobiles by this amount
-  var FRAME_RATE = params.frameRate || 15,
-      FRAME_TIME = 1000 / FRAME_RATE; // desired frames per second
+  var FRAME_RATE = params.frameRate || 15;
+  var FRAME_TIME = 1000 / FRAME_RATE; // desired frames per second
 
   var defaulColorScale = ["rgb(36,104, 180)", "rgb(60,157, 194)", "rgb(128,205,193 )", "rgb(151,218,168 )", "rgb(198,231,181)", "rgb(238,247,217)", "rgb(255,238,159)", "rgb(252,217,125)", "rgb(255,182,100)", "rgb(252,150,75)", "rgb(250,112,52)", "rgb(245,64,32)", "rgb(237,45,28)", "rgb(220,24,32)", "rgb(180,0,35)"];
 
@@ -419,6 +447,23 @@ var Windy = function Windy(params) {
 
   var setData = function setData(data) {
     gridData = data;
+  };
+
+  var setOptions = function setOptions(options) {
+    if (options.hasOwnProperty("minVelocity")) MIN_VELOCITY_INTENSITY = options.minVelocity;
+
+    if (options.hasOwnProperty("maxVelocity")) MAX_VELOCITY_INTENSITY = options.maxVelocity;
+
+    if (options.hasOwnProperty("velocityScale")) VELOCITY_SCALE = (options.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio, 1 / 3) || 1);
+
+    if (options.hasOwnProperty("particleAge")) MAX_PARTICLE_AGE = options.particleAge;
+
+    if (options.hasOwnProperty("lineWidth")) PARTICLE_LINE_WIDTH = options.lineWidth;
+
+    if (options.hasOwnProperty("particleMultiplier")) PARTICLE_MULTIPLIER = options.particleMultiplier;
+
+    if (options.hasOwnProperty("frameRate")) FRAME_RATE = options.frameRate;
+    FRAME_TIME = 1000 / FRAME_RATE;
   };
 
   // interpolation for vectors like wind (u,v,m)
@@ -869,7 +914,8 @@ var Windy = function Windy(params) {
     stop: stop,
     createField: createField,
     interpolatePoint: interpolate,
-    setData: setData
+    setData: setData,
+    setOptions: setOptions
   };
 
   return windy;
