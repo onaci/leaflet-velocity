@@ -99,11 +99,8 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   onRemove: function (map) {
     var del = this._delegate || this;
     del.onLayerWillUnmount && del.onLayerWillUnmount(); // -- callback
-
-    map.getPanes().overlayPane.removeChild(this._canvas);
-
+    this.options.pane.removeChild(this._canvas);
     map.off(this.getEvents(), this);
-
     this._canvas = null;
   },
 

@@ -90,7 +90,7 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
     var del = this._delegate || this;
     del.onLayerWillUnmount && del.onLayerWillUnmount(); // -- callback
 
-    map.getPanes().overlayPane.removeChild(this._canvas);
+    this.options.pane.removeChild(this._canvas);
     map.off(this.getEvents(), this);
     this._canvas = null;
   },
@@ -267,7 +267,16 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     this._paneName = this.options.paneName || 'overlayPane'; // fall back to overlayPane for leaflet < 1
 
     var pane = map._panes.overlayPane;
-    if (map.createPane) pane = map.createPane(this._paneName); // create canvas, add to map pane
+
+    if (map.getPane) {
+      // attempt to get pane first to preserve parent (createPane voids this)
+      pane = map.getPane(this._paneName);
+
+      if (!pane) {
+        pane = map.createPane(this._paneName);
+      }
+    } // create canvas, add to map pane
+
 
     this._canvasLayer = L.canvasLayer({
       pane: pane

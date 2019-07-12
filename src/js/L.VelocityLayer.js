@@ -29,8 +29,13 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
     // fall back to overlayPane for leaflet < 1
     let pane = map._panes.overlayPane
-    if (map.createPane) pane = map.createPane(this._paneName);
-
+    if (map.getPane) {
+      // attempt to get pane first to preserve parent (createPane voids this)
+      pane = map.getPane(this._paneName);
+      if (!pane) {
+        pane = map.createPane(this._paneName);
+      }
+    }
     // create canvas, add to map pane
     this._canvasLayer = L.canvasLayer({ pane: pane }).delegate(this);
     this._canvasLayer.addTo(map);
