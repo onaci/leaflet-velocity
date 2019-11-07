@@ -239,10 +239,10 @@ var Windy = function(params) {
    * Calculate distortion of the wind vector caused by the shape of the projection at point (x, y). The wind
    * vector is modified in place and returned by this function.
    */
-  var distort = function(projection, λ, φ, x, y, scale, wind, windy) {
+  var distort = function(projection, λ, φ, x, y, scale, wind) {
     var u = wind[0] * scale;
     var v = wind[1] * scale;
-    var d = distortion(projection, λ, φ, x, y, windy);
+    var d = distortion(projection, λ, φ, x, y);
 
     // Scale distortion vectors by u and v, then add.
     wind[0] = d[0] * u + d[2] * v;
@@ -250,14 +250,16 @@ var Windy = function(params) {
     return wind;
   };
 
-  var distortion = function(projection, λ, φ, x, y, windy) {
+  var distortion = function(projection, λ, φ, x, y) {
     var τ = 2 * Math.PI;
-    var H = Math.pow(10, -5.2);
+//    var H = Math.pow(10, -5.2); // 0.00000630957344480193
+//    var H = 0.0000360;          // 0.0000360°φ ~= 4m  (from https://github.com/cambecc/earth/blob/master/public/libs/earth/1.0.0/micro.js#L13)
+    var H = 5;     // ToDo:   Why does this work?
     var hλ = λ < 0 ? H : -H;
     var hφ = φ < 0 ? H : -H;
 
-    var pλ = project(φ, λ + hλ, windy);
-    var pφ = project(φ + hφ, λ, windy);
+    var pλ = project(φ, λ + hλ);
+    var pφ = project(φ + hφ, λ);
 
     // Meridian scale factor (see Snyder, equation 4-3), where R = 1. This handles issue where length of 1º λ
     // changes depending on φ. Without this, there is a pinching effect at the poles.
@@ -323,44 +325,18 @@ var Windy = function(params) {
     return (deg / 180) * Math.PI;
   };
 
-  var rad2deg = function(ang) {
-    return ang / (Math.PI / 180.0);
-  };
-
   var invert = function(x, y, windy) {
-    var mapLonDelta = windy.east - windy.west;
-    var worldMapRadius =
-      ((windy.width / rad2deg(mapLonDelta)) * 360) / (2 * Math.PI);
-    var mapOffsetY =
-      (worldMapRadius / 2) *
-      Math.log((1 + Math.sin(windy.south)) / (1 - Math.sin(windy.south)));
-    var equatorY = windy.height + mapOffsetY;
-    var a = (equatorY - y) / worldMapRadius;
-
-    var lat = (180 / Math.PI) * (2 * Math.atan(Math.exp(a)) - Math.PI / 2);
-    var lon = rad2deg(windy.west) + (x / windy.width) * rad2deg(mapLonDelta);
-    return [lon, lat];
-  };
-
-  var mercY = function(lat) {
-    return Math.log(Math.tan(lat / 2 + Math.PI / 4));
+    var latlon = params.map.containerPointToLatLng(L.point(x,y));
+    return [latlon.lng, latlon.lat];
   };
 
   var project = function(lat, lon, windy) {
-    // both in radians, use deg2rad if neccessary
-    var ymin = mercY(windy.south);
-    var ymax = mercY(windy.north);
-    var xFactor = windy.width / (windy.east - windy.west);
-    var yFactor = windy.height / (ymax - ymin);
-
-    var y = mercY(deg2rad(lat));
-    var x = (deg2rad(lon) - windy.west) * xFactor;
-    var y = (ymax - y) * yFactor; // y points south
-    return [x, y];
+    var xy = params.map.latLngToContainerPoint(L.latLng(lat,lon));
+    return [xy.x, xy.y];
   };
 
   var interpolateField = function(grid, bounds, extent, callback) {
-    var projection = {};
+    var projection = {};  // map.crs used instead
     var mapArea = (extent.south - extent.north) * (extent.west - extent.east);
     var velocityScale = VELOCITY_SCALE * Math.pow(mapArea, 0.4);
 
@@ -370,7 +346,7 @@ var Windy = function(params) {
     function interpolateColumn(x) {
       var column = [];
       for (var y = bounds.y; y <= bounds.yMax; y += 2) {
-        var coord = invert(x, y, extent);
+        var coord = invert(x, y);
         if (coord) {
           var λ = coord[0],
             φ = coord[1];
@@ -384,8 +360,7 @@ var Windy = function(params) {
                 x,
                 y,
                 velocityScale,
-                wind,
-                extent
+                wind
               );
               column[y + 1] = column[y] = wind;
             }
