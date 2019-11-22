@@ -110,7 +110,7 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
   _initWindy: function (self) {
     // windy object, copy options
     const options = Object.assign(
-      { canvas: self._canvasLayer._canvas },
+      { canvas: self._canvasLayer._canvas, map: this._map },
       self.options
     );
     this._windy = new Windy(options);

@@ -109,13 +109,6 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
     map.addLayer(this);
     return this;
   },
-  // --------------------------------------------------------------------------------
-  LatLonToMercator: function (latlon) {
-    return {
-      x: (latlon.lng * 6378137 * Math.PI) / 180,
-      y: Math.log(Math.tan(((90 + latlon.lat) * Math.PI) / 360)) * 6378137
-    };
-  },
 
   //------------------------------------------------------------------------------
   drawLayer: function () {
@@ -124,8 +117,8 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
     var bounds = this._map.getBounds();
     var zoom = this._map.getZoom();
 
-    var center = this.LatLonToMercator(this._map.getCenter());
-    var corner = this.LatLonToMercator(
+    var center = this._map.options.crs.project(this._map.getCenter());
+    var corner = this._map.options.crs.project(
       this._map.containerPointToLatLng(this._map.getSize())
     );
 
