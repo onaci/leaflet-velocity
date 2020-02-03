@@ -33,7 +33,7 @@ var velocityLayer = L.velocityLayer({
   colorScale: [], // define your own array of hex/rgb colors
   onAdd: null, // callback function
   onRemove: null, // callback function
-  opacity: 1, // layer opacity
+  opacity: 0.97, // layer opacity, default 0.97
 
   // optional pane to add the layer, will be created if doesn't exist
   // leaflet v1+ only (falls back to overlayPane for < v1)
@@ -50,10 +50,10 @@ It can be `m/s` for meter per second, `k/h` for kilometer per hour or `kt` for k
 
 ## Public methods
 
-| method       | params              | description                       |
-| ------------ | ------------------- | --------------------------------- |
-| `setData`    | `data: {Object}`    | update the layer with new data    |
-| `setOptions` | `options: {Object}` | update the layer with new options |
+| method       | params     | description                       |
+| ------------ | ---------- | --------------------------------- |
+| `setData`    | `{Object}` | update the layer with new data    |
+| `setOptions` | `{Object}` | update the layer with new options |
 
 ## Build / watch
 

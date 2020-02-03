@@ -22,6 +22,7 @@ var Windy = function(params) {
   var PARTICLE_REDUCTION = Math.pow(window.devicePixelRatio, 1 / 3) || 1.6; // multiply particle count for mobiles by this amount
   var FRAME_RATE = params.frameRate || 15;
   var FRAME_TIME = 1000 / FRAME_RATE; // desired frames per second
+  var OPACITY = 0.97;
 
   var defaulColorScale = [
     "rgb(36,104, 180)",
@@ -75,6 +76,8 @@ var Windy = function(params) {
 
     if (options.hasOwnProperty("particleMultiplier"))
       PARTICLE_MULTIPLIER = options.particleMultiplier;
+
+    if (options.hasOwnProperty("opacity")) OPACITY = +options.opacity;
 
     if (options.hasOwnProperty("frameRate")) FRAME_RATE = options.frameRate;
     FRAME_TIME = 1000 / FRAME_RATE;
@@ -411,7 +414,7 @@ var Windy = function(params) {
       particleCount *= PARTICLE_REDUCTION;
     }
 
-    var fadeFillStyle = "rgba(0, 0, 0, 0.97)";
+    var fadeFillStyle = `rgba(0, 0, 0, ${OPACITY})`;
 
     var particles = [];
     for (var i = 0; i < particleCount; i++) {
