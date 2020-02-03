@@ -1,4 +1,5 @@
 # leaflet-velocity [![NPM version][npm-image]][npm-url] [![NPM Downloads][npm-downloads-image]][npm-url]
+
 A plugin for Leaflet (v1.0.3, and v0.7.7) to create a canvas visualisation layer for direction and intensity of arbitrary velocities (e.g. wind, ocean current).
 
 Live Demo: https://danwild.github.io/leaflet-velocity/
@@ -10,32 +11,33 @@ Live Demo: https://danwild.github.io/leaflet-velocity/
 ![Screenshot](/screenshots/velocity.gif?raw=true)
 
 ## Example use:
+
 ```javascript
 var velocityLayer = L.velocityLayer({
-	
-	displayValues: true,
-	displayOptions: {
-		velocityType: 'Global Wind',
-		position: 'bottomleft',
-		emptyString: 'No velocity data',
-		angleConvention: 'bearingCW',
-		displayPosition: 'bottomleft',
-		displayEmptyString: 'No velocity data',
-		speedUnit: 'kt'
-	},
-	data: data,           // see demo/*.json, or wind-js-server for example data service
-	
-	// OPTIONAL
-	minVelocity: 0,       // used to align color scale
-	maxVelocity: 10,      // used to align color scale
-	velocityScale: 0.005, // modifier for particle animations, arbitrarily defaults to 0.005
-	colorScale: [],       // define your own array of hex/rgb colors
-	onAdd: null,          // callback function
-	onRemove: null,       // callback function
+  displayValues: true,
+  displayOptions: {
+    velocityType: "Global Wind",
+    position: "bottomleft",
+    emptyString: "No velocity data",
+    angleConvention: "bearingCW",
+    displayPosition: "bottomleft",
+    displayEmptyString: "No velocity data",
+    speedUnit: "kt"
+  },
+  data: data, // see demo/*.json, or wind-js-server for example data service
 
-	// optional pane to add the layer, will be created if doesn't exist
-	// leaflet v1+ only (falls back to overlayPane for < v1)
-	paneName: 'overlayPane'
+  // OPTIONAL
+  minVelocity: 0, // used to align color scale
+  maxVelocity: 10, // used to align color scale
+  velocityScale: 0.005, // modifier for particle animations, arbitrarily defaults to 0.005
+  colorScale: [], // define your own array of hex/rgb colors
+  onAdd: null, // callback function
+  onRemove: null, // callback function
+  opacity: 1, // layer opacity
+
+  // optional pane to add the layer, will be created if doesn't exist
+  // leaflet v1+ only (falls back to overlayPane for < v1)
+  paneName: "overlayPane"
 });
 ```
 
@@ -48,26 +50,31 @@ It can be `m/s` for meter per second, `k/h` for kilometer per hour or `kt` for k
 
 ## Public methods
 
-|method|params|description|
-|---|---|---|
-|`setData`|`data: {Object}`|update the layer with new data|
-|`setOptions`|`options: {Object}`|update the layer with new options|
+| method       | params              | description                       |
+| ------------ | ------------------- | --------------------------------- |
+| `setData`    | `data: {Object}`    | update the layer with new data    |
+| `setOptions` | `options: {Object}` | update the layer with new options |
 
 ## Build / watch
+
 ```shell
 npm run watch
 ```
 
 ## Reference
+
 `leaflet-velocity` is possible because of things like:
+
 - [L.CanvasOverlay.js](https://gist.github.com/Sumbera/11114288)
 - [WindJS](https://github.com/Esri/wind-js)
 - [earth](https://github.com/cambecc/earth)
 
 ## Example data
+
 Data shown for the Great Barrier Reef has been derived from [CSIRO's eReefs products](https://research.csiro.au/ereefs/)
 
 ## License
+
 MIT License (MIT)
 
 [npm-image]: https://badge.fury.io/js/leaflet-velocity.svg
