@@ -18,17 +18,16 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
   _timer: 0,
   _mouseControl: null,
 
-  initialize: function (options) {
+  initialize: function(options) {
     L.setOptions(this, options);
   },
 
-  onAdd: function (map) {
-
+  onAdd: function(map) {
     // determine where to add the layer
-    this._paneName = this.options.paneName || 'overlayPane';
+    this._paneName = this.options.paneName || "overlayPane";
 
     // fall back to overlayPane for leaflet < 1
-    let pane = map._panes.overlayPane
+    let pane = map._panes.overlayPane;
     if (map.getPane) {
       // attempt to get pane first to preserve parent (createPane voids this)
       pane = map.getPane(this._paneName);
@@ -43,11 +42,11 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     this._map = map;
   },
 
-  onRemove: function (map) {
+  onRemove: function(map) {
     this._destroyWind();
   },
 
-  setData: function (data) {
+  setData: function(data) {
     this.options.data = data;
     if (this._windy) {
       this._windy.setData(data);
@@ -56,7 +55,12 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     this.fire("load");
   },
 
-  setOptions: function (options) {
+  setOpacity: function(opacity) {
+    console.log("this._canvasLayer", this._canvasLayer);
+    this._canvasLayer.setOpacity(opacity);
+  },
+
+  setOptions: function(options) {
     this.options = Object.assign(this.options, options);
     if (options.hasOwnProperty("displayOptions")) {
       this.options.displayOptions = Object.assign(
@@ -77,7 +81,7 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
   /*------------------------------------ PRIVATE ------------------------------------------*/
 
-  onDrawLayer: function (overlay, params) {
+  onDrawLayer: function(overlay, params) {
     var self = this;
 
     if (!this._windy) {
@@ -91,23 +95,31 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
 
     if (this._timer) clearTimeout(self._timer);
 
-    this._timer = setTimeout(function () {
+    this._timer = setTimeout(function() {
       self._startWindy();
     }, 750); // showing velocity is delayed
   },
 
-  _startWindy: function () {
+  _startWindy: function() {
     var bounds = this._map.getBounds();
     var size = this._map.getSize();
 
     // bounds, width, height, extent
-    this._windy.start([[0, 0], [size.x, size.y]], size.x, size.y, [
-      [bounds._southWest.lng, bounds._southWest.lat],
-      [bounds._northEast.lng, bounds._northEast.lat]
-    ]);
+    this._windy.start(
+      [
+        [0, 0],
+        [size.x, size.y]
+      ],
+      size.x,
+      size.y,
+      [
+        [bounds._southWest.lng, bounds._southWest.lat],
+        [bounds._northEast.lng, bounds._northEast.lat]
+      ]
+    );
   },
 
-  _initWindy: function (self) {
+  _initWindy: function(self) {
     // windy object, copy options
     const options = Object.assign(
       { canvas: self._canvasLayer._canvas, map: this._map },
@@ -129,7 +141,7 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     this._initMouseHandler(false);
   },
 
-  _initMouseHandler: function (voidPrevious) {
+  _initMouseHandler: function(voidPrevious) {
     if (voidPrevious) {
       this._map.removeControl(this._mouseControl);
       this._mouseControl = false;
@@ -141,17 +153,17 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     }
   },
 
-  _clearAndRestart: function () {
+  _clearAndRestart: function() {
     if (this._context) this._context.clearRect(0, 0, 3000, 3000);
     if (this._windy) this._startWindy();
   },
 
-  _clearWind: function () {
+  _clearWind: function() {
     if (this._windy) this._windy.stop();
     if (this._context) this._context.clearRect(0, 0, 3000, 3000);
   },
 
-  _destroyWind: function () {
+  _destroyWind: function() {
     if (this._timer) clearTimeout(this._timer);
     if (this._windy) this._windy.stop();
     if (this._context) this._context.clearRect(0, 0, 3000, 3000);
@@ -162,6 +174,6 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
   }
 });
 
-L.velocityLayer = function (options) {
+L.velocityLayer = function(options) {
   return new L.VelocityLayer(options);
 };

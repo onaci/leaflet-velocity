@@ -259,7 +259,7 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
   },
   onAdd: function onAdd(map) {
     // determine where to add the layer
-    this._paneName = this.options.paneName || 'overlayPane'; // fall back to overlayPane for leaflet < 1
+    this._paneName = this.options.paneName || "overlayPane"; // fall back to overlayPane for leaflet < 1
 
     var pane = map._panes.overlayPane;
 
@@ -294,6 +294,11 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     }
 
     this.fire("load");
+  },
+  setOpacity: function setOpacity(opacity) {
+    console.log("this._canvasLayer", this._canvasLayer);
+
+    this._canvasLayer.setOpacity(opacity);
   },
   setOptions: function setOptions(options) {
     this.options = Object.assign(this.options, options);

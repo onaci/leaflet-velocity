@@ -113,7 +113,9 @@ var Windy = function(params) {
 
     data.forEach(function(record) {
       switch (
-        record.header.parameterCategory + "," + record.header.parameterNumber
+        record.header.parameterCategory +
+        "," +
+        record.header.parameterNumber
       ) {
         case "1,2":
         case "2,2":
@@ -252,9 +254,9 @@ var Windy = function(params) {
 
   var distortion = function(projection, λ, φ, x, y) {
     var τ = 2 * Math.PI;
-//    var H = Math.pow(10, -5.2); // 0.00000630957344480193
-//    var H = 0.0000360;          // 0.0000360°φ ~= 4m  (from https://github.com/cambecc/earth/blob/master/public/libs/earth/1.0.0/micro.js#L13)
-    var H = 5;     // ToDo:   Why does this work?
+    //    var H = Math.pow(10, -5.2); // 0.00000630957344480193
+    //    var H = 0.0000360;          // 0.0000360°φ ~= 4m  (from https://github.com/cambecc/earth/blob/master/public/libs/earth/1.0.0/micro.js#L13)
+    var H = 5; // ToDo:   Why does this work?
     var hλ = λ < 0 ? H : -H;
     var hφ = φ < 0 ? H : -H;
 
@@ -326,17 +328,17 @@ var Windy = function(params) {
   };
 
   var invert = function(x, y, windy) {
-    var latlon = params.map.containerPointToLatLng(L.point(x,y));
+    var latlon = params.map.containerPointToLatLng(L.point(x, y));
     return [latlon.lng, latlon.lat];
   };
 
   var project = function(lat, lon, windy) {
-    var xy = params.map.latLngToContainerPoint(L.latLng(lat,lon));
+    var xy = params.map.latLngToContainerPoint(L.latLng(lat, lon));
     return [xy.x, xy.y];
   };
 
   var interpolateField = function(grid, bounds, extent, callback) {
-    var projection = {};  // map.crs used instead
+    var projection = {}; // map.crs used instead
     var mapArea = (extent.south - extent.north) * (extent.west - extent.east);
     var velocityScale = VELOCITY_SCALE * Math.pow(mapArea, 0.4);
 
@@ -353,15 +355,7 @@ var Windy = function(params) {
           if (isFinite(λ)) {
             var wind = grid.interpolate(λ, φ);
             if (wind) {
-              wind = distort(
-                projection,
-                λ,
-                φ,
-                x,
-                y,
-                velocityScale,
-                wind
-              );
+              wind = distort(projection, λ, φ, x, y, velocityScale, wind);
               column[y + 1] = column[y] = wind;
             }
           }
