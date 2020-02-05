@@ -468,7 +468,7 @@ var Windy = function(params) {
       g.globalCompositeOperation = "destination-in";
       g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
       g.globalCompositeOperation = prev;
-      g.globalAlpha = 0.9;
+      g.globalAlpha = OPACITY === 0 ? 0 : OPACITY * 0.9;
 
       // Draw new particle trails.
       buckets.forEach(function(bucket, i) {
