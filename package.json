@@ -5,7 +5,7 @@
   "main": "dist/leaflet-velocity.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "./node_modules/gulp/bin/gulp.js"
+    "watch": "node ./node_modules/gulp/bin/gulp.js"
   },
   "repository": {
     "type": "git",
