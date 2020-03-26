@@ -519,8 +519,19 @@ var Windy = function Windy(params) {
   };
 
   var buildGrid = function buildGrid(data, callback) {
+    var supported = true;
+    if (data.length < 2) supported = false;
+    if (!supported) console.log("Windy Error: data must have at least two components (u,v)");
     builder = createBuilder(data);
     var header = builder.header;
+    if (header.hasOwnProperty("gridDefinitionTemplate") && header.gridDefinitionTemplate != 0) supported = false;
+
+    if (!supported) {
+      console.log("Windy Error: Only data with Latitude_Longitude coordinates is supported");
+    }
+
+    supported = true; // reset for futher checks
+
     λ0 = header.lo1;
     φ0 = header.la1; // the grid's origin (e.g., 0.0E, 90.0N)
 
@@ -530,8 +541,23 @@ var Windy = function Windy(params) {
     ni = header.nx;
     nj = header.ny; // number of grid points W-E and N-S (e.g., 144 x 73)
 
+    if (header.hasOwnProperty("scanMode")) {
+      var scanModeMask = header.scanMode.toString(2);
+      scanModeMask = ('0' + scanModeMask).slice(-8);
+      var scanModeMaskArray = scanModeMask.split('').map(Number).map(Boolean);
+      if (scanModeMaskArray[0]) Δλ = -Δλ;
+      if (scanModeMaskArray[1]) Δφ = -Δφ;
+      if (scanModeMaskArray[2]) supported = false;
+      if (scanModeMaskArray[3]) supported = false;
+      if (scanModeMaskArray[4]) supported = false;
+      if (scanModeMaskArray[5]) supported = false;
+      if (scanModeMaskArray[6]) supported = false;
+      if (scanModeMaskArray[7]) supported = false;
+      if (!supported) console.log("Windy Error: Data with scanMode: " + header.scanMode + " is not supported.");
+    }
+
     date = new Date(header.refTime);
-    date.setHours(date.getHours() + header.forecastTime); // Scan mode 0 assumed. Longitude increases from λ0, and latitude decreases from φ0.
+    date.setHours(date.getHours() + header.forecastTime); // Scan modes 0, 64 allowed.
     // http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table3-4.shtml
 
     grid = [];
