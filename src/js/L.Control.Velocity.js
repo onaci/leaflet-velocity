@@ -1,6 +1,8 @@
 L.Control.Velocity = L.Control.extend({
   options: {
     position: "bottomleft",
+    directionString: "Direction:",
+    speedString: "Speed:",
     emptyString: "Unavailable",
     // Could be any combination of 'bearing' (angle toward which the flow goes) or 'meteo' (angle from which the flow comes)
     // and 'CW' (angle value increases clock-wise) or 'CCW' (angle value increases counter clock-wise)
@@ -86,7 +88,8 @@ L.Control.Velocity = L.Control.extend({
       htmlOut =
         "<strong>" +
         this.options.velocityType +
-        " Direction: </strong>" +
+		this.options.directionString +
+        " </strong>" +
         self
           .vectorToDegrees(
             gridValue[0],
@@ -97,7 +100,8 @@ L.Control.Velocity = L.Control.extend({
         "°" +
         ", <strong>" +
         this.options.velocityType +
-        " Speed: </strong>" +
+		this.options.speedString +
+        " </strong>" +
         self
           .vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
           .toFixed(2) +
