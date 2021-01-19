@@ -7,6 +7,8 @@ L.Control.Velocity = L.Control.extend({
     angleConvention: "bearingCCW",
     // Could be 'm/s' for meter per second, 'k/h' for kilometer per hour or 'kt' for knots
     speedUnit: "m/s",
+    directionString: "Direction",
+    speedString: "Speed",
     onAdd: null,
     onRemove: null
   },
@@ -83,25 +85,15 @@ L.Control.Velocity = L.Control.extend({
       !isNaN(gridValue[1]) &&
       gridValue[2]
     ) {
-      htmlOut =
-        "<strong>" +
-        this.options.velocityType +
-        " Direction: </strong>" +
-        self
-          .vectorToDegrees(
-            gridValue[0],
-            gridValue[1],
-            this.options.angleConvention
-          )
-          .toFixed(2) +
-        "°" +
-        ", <strong>" +
-        this.options.velocityType +
-        " Speed: </strong>" +
-        self
-          .vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
-          .toFixed(2) +
-        this.options.speedUnit;
+		htmlOut = `<strong> ${this.options.velocityType} ${
+			this.options.directionString
+		}: </strong> ${self
+			.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention)
+			.toFixed(2)} °, <strong> ${this.options.velocityType} ${
+			this.options.speedString
+		}: </strong> ${self
+			.vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
+			.toFixed(2)} ${this.options.speedUnit}`;
     } else {
       htmlOut = this.options.emptyString;
     }

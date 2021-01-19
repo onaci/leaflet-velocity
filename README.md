@@ -22,7 +22,9 @@ var velocityLayer = L.velocityLayer({
     angleConvention: "bearingCW",
     displayPosition: "bottomleft",
     displayEmptyString: "No velocity data",
-    speedUnit: "kt"
+    speedUnit: "kt",
+    directionString: "Direction",
+    speedString: "Speed"
   },
   data: data, // see demo/*.json, or wind-js-server for example data service
 
