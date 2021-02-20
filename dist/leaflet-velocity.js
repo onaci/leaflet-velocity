@@ -272,7 +272,7 @@ L.Control.Velocity = L.Control.extend({
     var htmlOut = "";
 
     if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-      htmlOut = "<strong>".concat(this.options.velocityType, " ").concat(this.options.directionString, ": </strong> ").concat(self.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention).toFixed(2) + "\xB0 ").concat(self.degreesToCardinalDirection(this, gridValue[0], gridValue[1], this.options.angleConvention)).concat(this.options.velocityType, " ").concat(this.options.speedString, ": </strong> ").concat(self.vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit).toFixed(2), " ").concat(this.options.speedUnit);
+      htmlOut = "<strong> ".concat(this.options.velocityType, " ").concat(this.options.directionString, ": </strong> ").concat(self.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention).toFixed(2) + "\xB0 ").concat(self.degreesToCardinalDirection(this, gridValue[0], gridValue[1], this.options.angleConvention, "<strong> ")).concat(this.options.velocityType, " ").concat(this.options.speedString, ": </strong> ").concat(self.vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit).toFixed(2), " ").concat(this.options.speedUnit);
     } else {
       htmlOut = this.options.emptyString;
     }
