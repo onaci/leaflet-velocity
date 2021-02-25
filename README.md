@@ -16,14 +16,28 @@ Live Demo: https://danwild.github.io/leaflet-velocity/
 var velocityLayer = L.velocityLayer({
   displayValues: true,
   displayOptions: {
+    // label prefix
     velocityType: "Global Wind",
+    
+    // leaflet control position
     position: "bottomleft",
+    
+    // no data at cursor
     emptyString: "No velocity data",
+    
+    // see explanation below
     angleConvention: "bearingCW",
-    displayPosition: "bottomleft",
-    displayEmptyString: "No velocity data",
-    speedUnit: "kt",
+    
+    // display cardinal direction alongside degrees
+    showCardinal: false,
+    
+    // one of: ['ms', 'k/h', 'kt']
+    speedUnit: "ms",
+    
+    // direction label prefix
     directionString: "Direction",
+    
+    // speed label prefix
     speedString: "Speed"
   },
   data: data, // see demo/*.json, or wind-js-server for example data service
