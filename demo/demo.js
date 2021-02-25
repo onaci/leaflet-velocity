@@ -49,8 +49,9 @@ $.getJSON("wind-gbr.json", function(data) {
     displayValues: true,
     displayOptions: {
       velocityType: "GBR Wind",
-      displayPosition: "bottomleft",
-      displayEmptyString: "No wind data"
+      position: "bottomleft",
+      emptyString: "No wind data",
+      showCardinal: true
     },
     data: data,
     maxVelocity: 10
@@ -64,8 +65,8 @@ $.getJSON("water-gbr.json", function(data) {
     displayValues: true,
     displayOptions: {
       velocityType: "GBR Water",
-      displayPosition: "bottomleft",
-      displayEmptyString: "No water data"
+      position: "bottomleft",
+      emptyString: "No water data"
     },
     data: data,
     maxVelocity: 0.6,
@@ -80,8 +81,8 @@ $.getJSON("wind-global.json", function(data) {
     displayValues: true,
     displayOptions: {
       velocityType: "Global Wind",
-      displayPosition: "bottomleft",
-      displayEmptyString: "No wind data"
+      position: "bottomleft",
+      emptyString: "No wind data"
     },
     data: data,
     maxVelocity: 15

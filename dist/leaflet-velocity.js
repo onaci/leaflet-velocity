@@ -151,6 +151,7 @@ L.Control.Velocity = L.Control.extend({
     // Could be any combination of 'bearing' (angle toward which the flow goes) or 'meteo' (angle from which the flow comes)
     // and 'CW' (angle value increases clock-wise) or 'CCW' (angle value increases counter clock-wise)
     angleConvention: "bearingCCW",
+    showCardinal: false,
     // Could be 'm/s' for meter per second, 'k/h' for kilometer per hour or 'kt' for knots
     speedUnit: "m/s",
     directionString: "Direction",
@@ -199,63 +200,45 @@ L.Control.Velocity = L.Control.extend({
 
     return velocityDirToDegrees;
   },
+  degreesToCardinalDirection: function degreesToCardinalDirection(deg) {
+    var cardinalDirection = '';
 
-  degreesToCardinalDirection: function degreesToCardinalDirection(self, uMs, vMs, angleConvention) {
-    let cardinalDirection = ''
-    var deg = self.vectorToDegrees(uMs, vMs, angleConvention)
     if (deg >= 0 && deg < 11.25 || deg >= 348.75) {
-      cardinalDirection = 'N'
+      cardinalDirection = 'N';
+    } else if (deg >= 11.25 && deg < 33.75) {
+      cardinalDirection = 'NNW';
+    } else if (deg >= 33.75 && deg < 56.25) {
+      cardinalDirection = 'NW';
+    } else if (deg >= 56.25 && deg < 78.75) {
+      cardinalDirection = 'WNW';
+    } else if (deg >= 78.25 && deg < 101.25) {
+      cardinalDirection = 'W';
+    } else if (deg >= 101.25 && deg < 123.75) {
+      cardinalDirection = 'WSW';
+    } else if (deg >= 123.75 && deg < 146.25) {
+      cardinalDirection = 'SW';
+    } else if (deg >= 146.25 && deg < 168.75) {
+      cardinalDirection = 'SSW';
+    } else if (deg >= 168.75 && deg < 191.25) {
+      cardinalDirection = 'S';
+    } else if (deg >= 191.25 && deg < 213.75) {
+      cardinalDirection = 'SSE';
+    } else if (deg >= 213.75 && deg < 236.25) {
+      cardinalDirection = 'SE';
+    } else if (deg >= 236.25 && deg < 258.75) {
+      cardinalDirection = 'ESE';
+    } else if (deg >= 258.75 && deg < 281.25) {
+      cardinalDirection = 'E';
+    } else if (deg >= 281.25 && deg < 303.75) {
+      cardinalDirection = 'ENE';
+    } else if (deg >= 303.75 && deg < 326.25) {
+      cardinalDirection = 'NE';
+    } else if (deg >= 326.25 && deg < 348.75) {
+      cardinalDirection = 'NNE';
     }
-    else if (deg >= 11.25 && deg < 33.75){
-      cardinalDirection = 'NNW'
-    }
-    else if (deg >= 33.75 && deg < 56.25){
-      cardinalDirection = 'NW'
-    }
-    else if (deg >= 56.25 && deg < 78.75){
-      cardinalDirection = 'WNW'
-    }
-    else if (deg >= 78.25 && deg < 101.25){
-      cardinalDirection = 'W'
-    }
-    else if (deg >= 101.25 && deg < 123.75){
-      cardinalDirection = 'WSW'
-    }
-    else if (deg >= 123.75 && deg < 146.25){
-      cardinalDirection = 'SW'
-    }
-    else if (deg >= 146.25 && deg < 168.75){
-      cardinalDirection = 'SSW'
-    }
-    else if (deg >= 168.75 && deg < 191.25){
-      cardinalDirection = 'S'
-    }
-    else if (deg >= 191.25 && deg < 213.75){
-      cardinalDirection = 'SSE'
-    }
-    else if (deg >= 213.75 && deg < 236.25){
-      cardinalDirection = 'SE'
-    }
-    else if (deg >= 236.25 && deg < 258.75){
-      cardinalDirection = 'ESE'
-    }
-    else if (deg >= 258.75 && deg < 281.25){
-      cardinalDirection = 'E'
-    }
-    else if (deg >= 281.25 && deg < 303.75){
-      cardinalDirection = 'ENE'
-    }
-    else if (deg >= 303.75 && deg < 326.25){
-      cardinalDirection = 'NE'
-    }
-    else if (deg >= 326.25 && deg < 348.75){
-      cardinalDirection = 'NNE'
-    }
-    
+
     return cardinalDirection;
   },
- 
-
   meterSec2Knots: function meterSec2Knots(meters) {
     return meters / 0.514;
   },
@@ -272,7 +255,9 @@ L.Control.Velocity = L.Control.extend({
     var htmlOut = "";
 
     if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-      htmlOut = "<strong> ".concat(this.options.velocityType, " ").concat(this.options.directionString, ": </strong> ").concat(self.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention).toFixed(2) + "\xB0 ").concat(self.degreesToCardinalDirection(this, gridValue[0], gridValue[1], this.options.angleConvention, "<strong> ")).concat(this.options.velocityType, " ").concat(this.options.speedString, ": </strong> ").concat(self.vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit).toFixed(2), " ").concat(this.options.speedUnit);
+      var deg = self.vectorToDegrees(gridValue[0], gridValue[1], this.options.angleConvention);
+      var cardinal = this.options.showCardinal ? " (".concat(self.degreesToCardinalDirection(deg), ") ") : '';
+      htmlOut = "<strong> ".concat(this.options.velocityType, " ").concat(this.options.directionString, ": </strong> ").concat(deg.toFixed(2), "\xB0").concat(cardinal, ", <strong> ").concat(this.options.velocityType, " ").concat(this.options.speedString, ": </strong> ").concat(self.vectorToSpeed(gridValue[0], gridValue[1], this.options.speedUnit).toFixed(2), " ").concat(this.options.speedUnit);
     } else {
       htmlOut = this.options.emptyString;
     }
