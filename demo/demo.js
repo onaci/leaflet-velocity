@@ -82,8 +82,7 @@ $.getJSON("wind-global.json", function(data) {
     displayOptions: {
       velocityType: "Global Wind",
       position: "bottomleft",
-      emptyString: "No wind data",
-      speedUnit: "mph",
+      emptyString: "No wind data"
     },
     data: data,
     maxVelocity: 15
