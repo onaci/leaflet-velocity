@@ -152,7 +152,7 @@ L.Control.Velocity = L.Control.extend({
     // and 'CW' (angle value increases clock-wise) or 'CCW' (angle value increases counter clock-wise)
     angleConvention: "bearingCCW",
     showCardinal: false,
-    // Could be 'm/s' for meter per second, 'k/h' for kilometer per hour or 'kt' for knots
+    // Could be 'm/s' for meter per second, 'k/h' for kilometer per hour, 'mph' for miles per hour or 'kt' for knots
     speedUnit: "m/s",
     directionString: "Direction",
     speedString: "Speed",
@@ -178,6 +178,8 @@ L.Control.Velocity = L.Control.extend({
       return this.meterSec2kilometerHour(velocityAbs);
     } else if (unit === "kt") {
       return this.meterSec2Knots(velocityAbs);
+    } else if (unit === "mph") {
+      return this.meterSec2milesHour(velocityAbs);
     } else {
       return velocityAbs;
     }
@@ -244,6 +246,9 @@ L.Control.Velocity = L.Control.extend({
   },
   meterSec2kilometerHour: function meterSec2kilometerHour(meters) {
     return meters * 3.6;
+  },
+  meterSec2milesHour: function meterSec2milesHour(meters) {
+    return meters * 2.23694;
   },
   _onMouseMove: function _onMouseMove(e) {
     var self = this;

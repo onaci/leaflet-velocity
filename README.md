@@ -31,7 +31,7 @@ var velocityLayer = L.velocityLayer({
     // display cardinal direction alongside degrees
     showCardinal: false,
     
-    // one of: ['ms', 'k/h', 'kt']
+    // one of: ['ms', 'k/h', 'mph', 'kt']
     speedUnit: "ms",
     
     // direction label prefix
