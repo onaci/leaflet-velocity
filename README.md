@@ -4,13 +4,13 @@
 
 As of version 2, `leaflet-velocity` is now under [CSIRO](https://www.csiro.au)'s [Open Source Software Licence Agreement](LICENSE.md), which is variation of the BSD / MIT License.
 
-There are no other plans for changes to licencing, and the project will remain open source.
+There are no other plans for changes to licensing, and the project will remain open source.
 
 ---
 
 A plugin for Leaflet (v1.0.3, and v0.7.7) to create a canvas visualisation layer for direction and intensity of arbitrary velocities (e.g. wind, ocean current).
 
-Live Demo: https://danwild.github.io/leaflet-velocity/
+Live Demo: https://onaci.github.io/leaflet-velocity/
 
 - Uses a modified version of [WindJS](https://github.com/Esri/wind-js) for core functionality.
 - Similar to [wind-js-leaflet](https://github.com/danwild/wind-js-leaflet), however much more versatile (provides a generic leaflet layer, and not restricted to wind).
