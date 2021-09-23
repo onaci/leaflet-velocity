@@ -99,7 +99,7 @@ Data shown for the Great Barrier Reef has been derived from [CSIRO's eReefs prod
 
 ## License
 
-MIT License (MIT)
+CSIRO Open Source Software Licence Agreement (variation of the BSD / MIT License)
 
 [npm-image]: https://badge.fury.io/js/leaflet-velocity.svg
 [npm-url]: https://www.npmjs.com/package/leaflet-velocity
