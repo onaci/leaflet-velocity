@@ -1,27 +1,28 @@
-<!-- https://github.com/danwild/leaflet-velocity -->
+<!-- https://github.com/onaci/leaflet-velocity -->
 
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-	<title>LeafletVelocity Demo</title>
-	<meta charset="utf-8">
-</head>
-<body>
+  <head>
+    <title>LeafletVelocity Demo</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <div id="map"></div>
 
-<div id="map"></div>
+    <!--vendor-->
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://npmcdn.com/leaflet@1.1.0/dist/leaflet.css"
+    />
+    <script src="https://npmcdn.com/leaflet@1.1.0/dist/leaflet.js"></script>
 
-<!--vendor-->
-<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-<link rel="stylesheet" href="https://npmcdn.com/leaflet@1.1.0/dist/leaflet.css" />
-<script src="https://npmcdn.com/leaflet@1.1.0/dist/leaflet.js"></script>
+    <!--leaflet-velocity-->
+    <link rel="stylesheet" href="../dist/leaflet-velocity.css" />
+    <script src="../dist/leaflet-velocity.js"></script>
 
-<!--leaflet-velocity-->
-<link rel="stylesheet" href="../dist/leaflet-velocity.css" />
-<script src="../dist/leaflet-velocity.js"></script>
-
-<!--demo-->
-<link rel="stylesheet" href="demo.css" />
-<script src="demo.js"></script>
-
-</body>
+    <!--demo-->
+    <link rel="stylesheet" href="demo.css" />
+    <script src="demo.js"></script>
+  </body>
 </html>

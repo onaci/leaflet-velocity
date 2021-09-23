@@ -1,6 +1,6 @@
 {
   "name": "leaflet-velocity",
-  "version": "1.9.2",
+  "version": "2.0.0",
   "description": "A custom layer for leaflet to visualise arbitrary velocities",
   "main": "dist/leaflet-velocity.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danwild/leaflet-velocity.git"
+    "url": "git+https://github.com/onaci/leaflet-velocity.git"
   },
   "keywords": [
     "leaflet",
@@ -22,12 +22,12 @@
     "visualisation",
     "overlay"
   ],
-  "author": "danwild@y7mail.com",
-  "license": "MIT",
+  "author": "daniel.wild@csiro.au",
+  "license": "See LICENSE in LICENSE.md",
   "bugs": {
-    "url": "https://github.com/danwild/leaflet-velocity/issues"
+    "url": "https://github.com/onaci/leaflet-velocity/issues"
   },
-  "homepage": "https://github.com/danwild/leaflet-velocity#readme",
+  "homepage": "https://github.com/onaci/leaflet-velocity#readme",
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.5.4",

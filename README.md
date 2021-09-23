@@ -1,5 +1,13 @@
 # leaflet-velocity [![NPM version][npm-image]][npm-url] [![NPM Downloads][npm-downloads-image]][npm-url]
 
+## Version 2 Notice
+
+As of version 2, `leaflet-velocity` is now under [CSIRO](https://www.csiro.au)'s [Open Source Software Licence Agreement](LICENSE.md), which is variation of the BSD / MIT License.
+
+There are no other plans for changes to licencing, and the project will remain open source.
+
+---
+
 A plugin for Leaflet (v1.0.3, and v0.7.7) to create a canvas visualisation layer for direction and intensity of arbitrary velocities (e.g. wind, ocean current).
 
 Live Demo: https://danwild.github.io/leaflet-velocity/
@@ -18,27 +26,27 @@ var velocityLayer = L.velocityLayer({
   displayOptions: {
     // label prefix
     velocityType: "Global Wind",
-    
+
     // leaflet control position
     position: "bottomleft",
-    
+
     // no data at cursor
     emptyString: "No velocity data",
-    
+
     // see explanation below
     angleConvention: "bearingCW",
-    
+
     // display cardinal direction alongside degrees
     showCardinal: false,
-    
+
     // one of: ['ms', 'k/h', 'kt']
     speedUnit: "ms",
-    
+
     // direction label prefix
     directionString: "Direction",
-    
+
     // speed label prefix
-    speedString: "Speed"
+    speedString: "Speed",
   },
   data: data, // see demo/*.json, or wind-js-server for example data service
 
@@ -53,7 +61,7 @@ var velocityLayer = L.velocityLayer({
 
   // optional pane to add the layer, will be created if doesn't exist
   // leaflet v1+ only (falls back to overlayPane for < v1)
-  paneName: "overlayPane"
+  paneName: "overlayPane",
 });
 ```
 
