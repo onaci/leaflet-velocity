@@ -56,7 +56,6 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
   },
 
   setOpacity: function(opacity) {
-    console.log("this._canvasLayer", this._canvasLayer);
     this._canvasLayer.setOpacity(opacity);
   },
 
