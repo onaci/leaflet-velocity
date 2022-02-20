@@ -63,7 +63,6 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   },
   //-------------------------------------------------------------
   onAdd: function onAdd(map) {
-    console.log('canvas onAdd', this);
     this._map = map;
     this._canvas = L.DomUtil.create("canvas", "leaflet-layer");
     this.tiles = {};
@@ -345,8 +344,6 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     this.fire("load");
   },
   setOpacity: function setOpacity(opacity) {
-    console.log("this._canvasLayer", this._canvasLayer);
-
     this._canvasLayer.setOpacity(opacity);
   },
   setOptions: function setOptions(options) {
