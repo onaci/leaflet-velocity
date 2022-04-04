@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+title: Leaflet Velocity
+version: 2.1.2
+message: 'If you use this software, please cite it as below.'
+type: software
+url: "https://github.com/onaci/leaflet-velocity"
+authors:
+  - given-names: Daniel Wild
+    family-names: Wild
+    email: mail@danwild.io
+    affiliation: >-
+      Commonwealth Scientific and Industrial Research
+      Organisation (CSIRO)
+    orcid: 'https://orcid.org/0000-0002-5127-2327'
