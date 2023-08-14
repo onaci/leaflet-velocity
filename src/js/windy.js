@@ -22,7 +22,7 @@ var Windy = function(params) {
   var PARTICLE_REDUCTION = Math.pow(window.devicePixelRatio, 1 / 3) || 1.6; // multiply particle count for mobiles by this amount
   var FRAME_RATE = params.frameRate || 15;
   var FRAME_TIME = 1000 / FRAME_RATE; // desired frames per second
-  var OPACITY = 0.97;
+  var OPACITY = params.opacity || 0.97;
 
   var defaulColorScale = [
     "rgb(36,104, 180)",
